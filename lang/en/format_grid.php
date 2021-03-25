@@ -162,7 +162,8 @@ $string['setnewactivity_help'] = "Show the new activity notification image when 
 $string['setfitsectioncontainertowindow'] = 'Fit the section popup to the window';
 $string['setfitsectioncontainertowindow_help'] = 'If enabled, the popup box with the contents of the section will fit to the size of the window and will scroll inside if necessary.  If disabled, the entire page will scroll instead.';
 
-$string['colourrule'] = "Please enter a valid RGB colour, six hexadecimal digits.";
+$string['default'] = 'Default - {$a}';
+$string['colourrule'] = "Please enter a valid RGB colour, six hexadecimal digits or '-' for default.";
 $string['opacityrule'] = "Please enter a valid opacity, between 0 and 1 with 0.1 increments.";
 $string['sectiontitlefontsizerule'] = "Please enter a valid section title font size, between 12 and 24 (pixels) or 0 for 'do not set'.";
 

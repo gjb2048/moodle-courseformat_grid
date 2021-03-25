@@ -396,6 +396,16 @@ class format_grid extends format_base {
     public function get_settings() {
         if (empty($this->settings) == true) {
             $this->settings = $this->get_format_options();
+            foreach ($this->settings as $settingname => $settingvalue) {
+                if (isset($settingvalue)) {
+                    $settingvtype = gettype($settingvalue);
+                    if ((($settingvtype == 'string') && ($settingvalue === '-')) ||
+                        (($settingvtype == 'integer') && ($settingvalue === 0))) {
+                        // Default value indicator is a hyphen or a number equal to 0.
+                        $this->settings[$settingname] = get_config('format_grid', 'default'.$settingname);
+                    }
+                }
+            }
         }
         return $this->settings;
     }
@@ -560,10 +570,6 @@ class format_grid extends format_base {
         $courseconfig = null;
 
         if ($courseformatoptions === false) {
-            /* Note: Because 'admin_setting_configcolourpicker' in 'settings.php' needs to use a prefixing '#'
-              this needs to be stripped off here if it's there for the format's specific colour picker. */
-            $defaults = $this->get_course_format_colour_defaults();
-
             $courseconfig = get_config('moodlecourse');
             $courseid = $this->get_courseid();
             if ($courseid == 1) { // New course.
@@ -587,127 +593,127 @@ class format_grid extends format_base {
                     'type' => PARAM_INT
                 ),
                 'imagecontaineralignment' => array(
-                    'default' => get_config('format_grid', 'defaultimagecontaineralignment'),
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'imagecontainerwidth' => array(
-                    'default' => get_config('format_grid', 'defaultimagecontainerwidth'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'imagecontainerratio' => array(
-                    'default' => get_config('format_grid', 'defaultimagecontainerratio'),
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'imageresizemethod' => array(
-                    'default' => get_config('format_grid', 'defaultimageresizemethod'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'bordercolour' => array(
-                    'default' => $defaults['defaultbordercolour'],
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'borderwidth' => array(
-                    'default' => get_config('format_grid', 'defaultborderwidth'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'borderradius' => array(
-                    'default' => get_config('format_grid', 'defaultborderradius'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'imagecontainerbackgroundcolour' => array(
-                    'default' => $defaults['defaultimagecontainerbackgroundcolour'],
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'currentselectedsectioncolour' => array(
-                    'default' => $defaults['defaultcurrentselectedsectioncolour'],
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'currentselectedimagecontainertextcolour' => array(
-                    'default' => $defaults['defaultcurrentselectedimagecontainertextcolour'],
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'currentselectedimagecontainercolour' => array(
-                    'default' => $defaults['defaultcurrentselectedimagecontainercolour'],
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'hidesectiontitle' => array(
-                    'default' => get_config('format_grid', 'defaulthidesectiontitle'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'sectiontitlegridlengthmaxoption' => array(
-                    'default' => get_config('format_grid', 'defaultsectiontitlegridlengthmaxoption'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'sectiontitleboxposition' => array(
-                    'default' => get_config('format_grid', 'defaultsectiontitleboxposition'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'sectiontitleboxinsideposition' => array(
-                    'default' => get_config('format_grid', 'defaultsectiontitleboxinsideposition'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'sectiontitleboxheight' => array(
-                    'default' => get_config('format_grid', 'defaultsectiontitleboxheight'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'sectiontitleboxopacity' => array(
-                    'default' => get_config('format_grid', 'defaultsectiontitleboxopacity'),
+                    'default' => '-',
                     'type' => PARAM_RAW
                 ),
                 'sectiontitlefontsize' => array(
-                    'default' => get_config('format_grid', 'defaultsectiontitlefontsize'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'sectiontitlealignment' => array(
-                    'default' => get_config('format_grid', 'defaultsectiontitlealignment'),
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'sectiontitleinsidetitletextcolour' => array(
-                    'default' => $defaults['defaultsectiontitleinsidetitletextcolour'],
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'sectiontitleinsidetitlebackgroundcolour' => array(
-                    'default' => $defaults['defaultsectiontitleinsidetitlebackgroundcolour'],
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'showsectiontitlesummary' => array(
-                    'default' => get_config('format_grid', 'defaultshowsectiontitlesummary'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'setshowsectiontitlesummaryposition' => array(
-                    'default' => get_config('format_grid', 'defaultsetshowsectiontitlesummaryposition'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'sectiontitlesummarymaxlength' => array(
-                    'default' => get_config('format_grid', 'defaultsectiontitlesummarymaxlength'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'sectiontitlesummarytextcolour' => array(
-                    'default' => $defaults['defaultsectiontitlesummarytextcolour'],
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'sectiontitlesummarybackgroundcolour' => array(
-                    'default' => $defaults['defaultsectiontitlesummarybackgroundcolour'],
-                    'type' => PARAM_ALPHANUM
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'sectiontitlesummarybackgroundopacity' => array(
-                    'default' => get_config('format_grid', 'defaultsectiontitlesummarybackgroundopacity'),
+                    'default' => '-',
                     'type' => PARAM_RAW
                 ),
                 'newactivity' => array(
-                    'default' => get_config('format_grid', 'defaultnewactivity'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'fitsectioncontainertowindow' => array(
-                    'default' => get_config('format_grid', 'defaultfitsectioncontainertowindow'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'greyouthidden' => array(
-                    'default' => get_config('format_grid', 'defaultgreyouthidden'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 ),
                 'setsection0ownpagenogridonesection' => array(
-                    'default' => get_config('format_grid', 'defaultsection0ownpagenogridonesection'),
+                    'default' => 0,
                     'type' => PARAM_INT
                 )
             );
@@ -758,56 +764,74 @@ class format_grid extends format_base {
                 )
             );
             if (has_capability('format/grid:changeimagecontaineralignment', $context)) {
+                $imagecontaineralignmentvalues = $this->generate_default_entry(
+                    'imagecontaineralignment',
+                    '-',
+                    self::get_horizontal_alignments()
+                );
                 $courseformatoptionsedit['imagecontaineralignment'] = array(
                     'label' => new lang_string('setimagecontaineralignment', 'format_grid'),
                     'help' => 'setimagecontaineralignment',
                     'help_component' => 'format_grid',
                     'element_type' => 'select',
-                    'element_attributes' => array(self::get_horizontal_alignments())
+                    'element_attributes' => array($imagecontaineralignmentvalues)
                 );
             } else {
-                $courseformatoptionsedit['imagecontaineralignment'] = array('label' => get_config(
-                            'format_grid', 'defaultimagecontaineralignment'), 'element_type' => 'hidden');
+                $courseformatoptionsedit['imagecontaineralignment'] = array(
+                    'label' => '-', 'element_type' => 'hidden');
             }
 
             if (has_capability('format/grid:changeimagecontainersize', $context)) {
+                $imagecontainerwidthvalues = $this->generate_default_entry(
+                    'imagecontainerwidth',
+                    0,
+                    self::$imagecontainerwidths
+                );
                 $courseformatoptionsedit['imagecontainerwidth'] = array(
                     'label' => new lang_string('setimagecontainerwidth', 'format_grid'),
                     'help' => 'setimagecontainerwidth',
                     'help_component' => 'format_grid',
                     'element_type' => 'select',
-                    'element_attributes' => array(self::$imagecontainerwidths)
+                    'element_attributes' => array($imagecontainerwidthvalues)
+                );
+                $imagecontainerratiovalues = $this->generate_default_entry(
+                    'imagecontainerratio',
+                    '-',
+                    self::$imagecontainerratios
                 );
                 $courseformatoptionsedit['imagecontainerratio'] = array(
                     'label' => new lang_string('setimagecontainerratio', 'format_grid'),
                     'help' => 'setimagecontainerratio',
                     'help_component' => 'format_grid',
                     'element_type' => 'select',
-                    'element_attributes' => array(self::$imagecontainerratios)
+                    'element_attributes' => array($imagecontainerratiovalues)
                 );
             } else {
-                $courseformatoptionsedit['imagecontainerwidth'] = array('label' => get_config(
-                            'format_grid', 'defaultimagecontainerwidth'), 'element_type' => 'hidden');
-                $courseformatoptionsedit['imagecontainerratio'] = array('label' => get_config(
-                            'format_grid', 'defaultimagecontainerratio'), 'element_type' => 'hidden');
+                $courseformatoptionsedit['imagecontainerwidth'] = array(
+                    'label' => '-', 'element_type' => 'hidden');
+                $courseformatoptionsedit['imagecontainerratio'] = array(
+                    'label' => 0, 'element_type' => 'hidden');
             }
 
             if (has_capability('format/grid:changeimageresizemethod', $context)) {
+                $imageresizemethodvalues = $this->generate_default_entry(
+                    'imageresizemethod',
+                    0,
+                    array(
+                        1 => new lang_string('scale', 'format_grid'), // Scale.
+                        2 => new lang_string('crop', 'format_grid')   // Crop.
+                    )
+                );
                 $courseformatoptionsedit['imageresizemethod'] = array(
                     'label' => new lang_string('setimageresizemethod', 'format_grid'),
                     'help' => 'setimageresizemethod',
                     'help_component' => 'format_grid',
                     'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            1 => new lang_string('scale', 'format_grid'), // Scale.
-                            2 => new lang_string('crop', 'format_grid')   // Crop.
-                        )
-                    )
+                    'element_attributes' => array($imageresizemethodvalues)
                 );
             } else {
-                $courseformatoptionsedit['imageresizemethod'] = array('label' => get_config(
-                            'format_grid', 'defaultimageresizemethod'), 'element_type' => 'hidden');
+                $courseformatoptionsedit['imageresizemethod'] = array(
+                    'label' => 0, 'element_type' => 'hidden');
             }
 
             if (has_capability('format/grid:changeimagecontainerstyle', $context)) {
@@ -817,7 +841,10 @@ class format_grid extends format_base {
                     'help_component' => 'format_grid',
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
-                        array('value' => $defaults['defaultbordercolour'])
+                        array(
+                            'defaultcolour' => $defaults['defaultbordercolour'],
+                            'value' => $$defaults['defaultbordercolour']
+                        )
                     )
                 );
 
@@ -829,16 +856,20 @@ class format_grid extends format_base {
                     'element_attributes' => array(self::$borderwidths)
                 );
 
+                $borderradiusvalues = $this->generate_default_entry(
+                    'borderradius',
+                    0,
+                    array(
+                        1 => new lang_string('off', 'format_grid'),
+                        2 => new lang_string('on', 'format_grid')
+                    )
+                );
                 $courseformatoptionsedit['borderradius'] = array(
                     'label' => new lang_string('setborderradius', 'format_grid'),
                     'help' => 'setborderradius',
                     'help_component' => 'format_grid',
                     'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            1 => new lang_string('off', 'format_grid'),
-                            2 => new lang_string('on', 'format_grid'))
-                    )
+                    'element_attributes' => array($borderradiusvalues)
                 );
 
                 $courseformatoptionsedit['imagecontainerbackgroundcolour'] = array(
@@ -847,7 +878,10 @@ class format_grid extends format_base {
                     'help_component' => 'format_grid',
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
-                        array('value' => $defaults['defaultimagecontainerbackgroundcolour'])
+                        array(
+                            'defaultcolour' => $defaults['defaultimagecontainerbackgroundcolour'],
+                            'value' => $defaults['defaultimagecontainerbackgroundcolour']
+                        )
                     )
                 );
 
@@ -857,7 +891,10 @@ class format_grid extends format_base {
                     'help_component' => 'format_grid',
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
-                        array('value' => $defaults['defaultcurrentselectedsectioncolour'])
+                        array(
+                            'defaultvalue' => $defaults['defaultcurrentselectedsectioncolour'],
+                            'value' => $defaults['defaultcurrentselectedsectioncolour']
+                        )
                     )
                 );
 
@@ -867,7 +904,10 @@ class format_grid extends format_base {
                     'help_component' => 'format_grid',
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
-                        array('value' => $defaults['defaultcurrentselectedimagecontainertextcolour'])
+                        array(
+                            'defaultvalue' => $defaults['defaultcurrentselectedimagecontainertextcolour'],
+                            'value' => $defaults['defaultcurrentselectedimagecontainertextcolour']
+                        )
                     )
                 );
 
@@ -877,36 +917,42 @@ class format_grid extends format_base {
                     'help_component' => 'format_grid',
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
-                        array('value' => $defaults['defaultcurrentselectedimagecontainercolour'])
+                        array(
+                            'defaultvalue' => $defaults['defaultcurrentselectedimagecontainercolour'],
+                            'value' => $defaults['defaultcurrentselectedimagecontainercolour']
+                        )
                     )
                 );
             } else {
-                $courseformatoptionsedit['bordercolour'] = array('label' => $defaults['defaultbordercolour'],
-                    'element_type' => 'hidden');
-                $courseformatoptionsedit['borderwidth'] = array('label' => get_config('format_grid', 'defaultborderwidth'),
-                    'element_type' => 'hidden');
-                $courseformatoptionsedit['borderradius'] = array('label' => get_config('format_grid', 'defaultborderradius'),
-                    'element_type' => 'hidden');
+                $courseformatoptionsedit['bordercolour'] = array(
+                    'label' => '-', 'element_type' => 'hidden');
+                $courseformatoptionsedit['borderwidth'] = array(
+                    'label' => 0, 'element_type' => 'hidden');
+                $courseformatoptionsedit['borderradius'] = array(
+                    'label' => 0, 'element_type' => 'hidden');
                 $courseformatoptionsedit['imagecontainerbackgroundcolour'] = array(
-                    'label' => $defaults['defaultimagecontainerbackgroundcolour'], 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['currentselectedsectioncolour'] = array(
-                    'label' => $defaults['defaultcurrentselectedsectioncolour'], 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['currentselectedimagecontainertextcolour'] = array(
-                    'label' => $defaults['defaultcurrentselectedimagecontainertextcolour'], 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['currentselectedimagecontainercolour'] = array(
-                    'label' => $defaults['defaultcurrentselectedimagecontainercolour'], 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
             }
 
             if (has_capability('format/grid:changesectiontitleoptions', $context)) {
+                $hidesectiontitlevalues = $this->generate_default_entry(
+                    'hidesectiontitle',
+                    0,
+                    array(
+                        1 => new lang_string('no'), // No.
+                        2 => new lang_string('yes') // Yes.
+                    )
+                );
                 $courseformatoptionsedit['hidesectiontitle'] = array(
                     'label' => new lang_string('hidesectiontitle', 'format_grid'),
                     'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            1 => new lang_string('no'), // No.
-                            2 => new lang_string('yes') // Yes.
-                        )
-                    ),
+                    'element_attributes' => array($hidesectiontitlevalues),
                     'help' => 'hidesectiontitle',
                     'help_component' => 'format_grid'
                 );
@@ -917,28 +963,36 @@ class format_grid extends format_base {
                     'help' => 'sectiontitlegridlengthmaxoption',
                     'help_component' => 'format_grid'
                 );
+
+                $sectiontitleboxpositionvalues = $this->generate_default_entry(
+                    'sectiontitleboxposition',
+                    0,
+                    array(
+                        1 => new lang_string('sectiontitleboxpositioninside', 'format_grid'),
+                        2 => new lang_string('sectiontitleboxpositionoutside', 'format_grid')
+                    )
+                );
                 $courseformatoptionsedit['sectiontitleboxposition'] = array(
                     'label' => new lang_string('sectiontitleboxposition', 'format_grid'),
                     'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            1 => new lang_string('sectiontitleboxpositioninside', 'format_grid'),
-                            2 => new lang_string('sectiontitleboxpositionoutside', 'format_grid')
-                        )
-                    ),
+                    'element_attributes' => array($sectiontitleboxpositionvalues),
                     'help' => 'sectiontitleboxposition',
                     'help_component' => 'format_grid'
+                );
+
+                $sectiontitleboxinsidepositionvalues = $this->generate_default_entry(
+                    'sectiontitleboxinsideposition',
+                    0,
+                    array(
+                        1 => new lang_string('sectiontitleboxinsidepositiontop', 'format_grid'),
+                        2 => new lang_string('sectiontitleboxinsidepositionmiddle', 'format_grid'),
+                        3 => new lang_string('sectiontitleboxinsidepositionbottom', 'format_grid')
+                    )
                 );
                 $courseformatoptionsedit['sectiontitleboxinsideposition'] = array(
                     'label' => new lang_string('sectiontitleboxinsideposition', 'format_grid'),
                     'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            1 => new lang_string('sectiontitleboxinsidepositiontop', 'format_grid'),
-                            2 => new lang_string('sectiontitleboxinsidepositionmiddle', 'format_grid'),
-                            3 => new lang_string('sectiontitleboxinsidepositionbottom', 'format_grid')
-                        )
-                    ),
+                    'element_attributes' => array($sectiontitleboxinsidepositionvalues),
                     'help' => 'sectiontitleboxinsideposition',
                     'help_component' => 'format_grid'
                 );
@@ -949,34 +1003,54 @@ class format_grid extends format_base {
                     'help' => 'sectiontitleboxheight',
                     'help_component' => 'format_grid'
                 );
+
+                $opacityvalues = array();
+                $opacityvalues['-'] = new lang_string('default', 'format_grid', get_config('format_grid', 'defaultsectiontitleboxopacity'));
+                $opacityvalues = array_merge($opacityvalues, self::get_default_opacities());
                 $courseformatoptionsedit['sectiontitleboxopacity'] = array(
                     'label' => new lang_string('sectiontitleboxopacity', 'format_grid'),
                     'element_type' => 'select',
-                    'element_attributes' => array(self::get_default_opacities()),
+                    'element_attributes' => array($opacityvalues),
                     'help' => 'sectiontitleboxopacity',
                     'help_component' => 'format_grid'
+                );
+
+                $sectiontitlefontsizevalues = $this->generate_default_entry(
+                    'sectiontitlefontsize',
+                    0,
+                    self::get_default_section_font_sizes()
                 );
                 $courseformatoptionsedit['sectiontitlefontsize'] = array(
                     'label' => new lang_string('sectiontitlefontsize', 'format_grid'),
                     'element_type' => 'select',
-                    'element_attributes' => array(self::get_default_section_font_sizes()),
+                    'element_attributes' => array($sectiontitlefontsizevalues),
                     'help' => 'sectiontitlefontsize',
                     'help_component' => 'format_grid'
+                );
+
+                $sectiontitlealignmentvalues = $this->generate_default_entry(
+                    'sectiontitlealignment',
+                    '-',
+                    self::get_horizontal_alignments()
                 );
                 $courseformatoptionsedit['sectiontitlealignment'] = array(
                     'label' => new lang_string('sectiontitlealignment', 'format_grid'),
                     'help' => 'sectiontitlealignment',
                     'help_component' => 'format_grid',
                     'element_type' => 'select',
-                    'element_attributes' => array(self::get_horizontal_alignments())
+                    'element_attributes' => array($sectiontitlealignmentvalues)
                 );
+
                 $courseformatoptionsedit['sectiontitleinsidetitletextcolour'] = array(
                     'label' => new lang_string('sectiontitleinsidetitletextcolour', 'format_grid'),
                     'help' => 'sectiontitleinsidetitletextcolour',
                     'help_component' => 'format_grid',
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
-                        array('value' => $defaults['defaultsectiontitleinsidetitletextcolour'])
+                        array(
+                            'defaultvalue' => $defaults['defaultsectiontitleinsidetitletextcolour'],
+                            'value' => $defaults['defaultsectiontitleinsidetitletextcolour']
+                        )
                     )
                 );
                 $courseformatoptionsedit['sectiontitleinsidetitlebackgroundcolour'] = array(
@@ -985,32 +1059,43 @@ class format_grid extends format_base {
                     'help_component' => 'format_grid',
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
-                        array('value' => $defaults['defaultsectiontitleinsidetitlebackgroundcolour'])
+                        array(
+                            'defaultvalue' => $defaults['defaultsectiontitleinsidetitlebackgroundcolour'],
+                            'value' => $defaults['defaultsectiontitleinsidetitlebackgroundcolour']
+                        )
+                    )
+                );
+
+                $showsectiontitlesummaryvalues = $this->generate_default_entry(
+                    'showsectiontitlesummary',
+                    0,
+                    array(
+                        1 => new lang_string('no'), // No.
+                        2 => new lang_string('yes') // Yes.
                     )
                 );
                 $courseformatoptionsedit['showsectiontitlesummary'] = array(
                     'label' => new lang_string('showsectiontitlesummary', 'format_grid'),
                     'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            1 => new lang_string('no'), // No.
-                            2 => new lang_string('yes') // Yes.
-                        )
-                    ),
+                    'element_attributes' => array($showsectiontitlesummaryvalues),
                     'help' => 'showsectiontitlesummary',
                     'help_component' => 'format_grid'
+                );
+
+                $setshowsectiontitlesummarypositionvalues = $this->generate_default_entry(
+                    'setshowsectiontitlesummaryposition',
+                    0,
+                    array(
+                        1 => new lang_string('top', 'format_grid'),
+                        2 => new lang_string('bottom', 'format_grid'),
+                        3 => new lang_string('left', 'format_grid'),
+                        4 => new lang_string('right', 'format_grid')
+                    )
                 );
                 $courseformatoptionsedit['setshowsectiontitlesummaryposition'] = array(
                     'label' => new lang_string('setshowsectiontitlesummaryposition', 'format_grid'),
                     'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            1 => new lang_string('top', 'format_grid'),
-                            2 => new lang_string('bottom', 'format_grid'),
-                            3 => new lang_string('left', 'format_grid'),
-                            4 => new lang_string('right', 'format_grid')
-                        )
-                    ),
+                    'element_attributes' => array($setshowsectiontitlesummarypositionvalues),
                     'help' => 'setshowsectiontitlesummaryposition',
                     'help_component' => 'format_grid'
                 );
@@ -1027,7 +1112,10 @@ class format_grid extends format_base {
                     'help_component' => 'format_grid',
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
-                        array('value' => $defaults['defaultsectiontitlesummarytextcolour'])
+                        array(
+                            'defaultvalue' => $defaults['defaultsectiontitlesummarytextcolour'],
+                            'value' => $defaults['defaultsectiontitlesummarytextcolour']
+                        )
                     )
                 );
                 $courseformatoptionsedit['sectiontitlesummarybackgroundcolour'] = array(
@@ -1036,49 +1124,53 @@ class format_grid extends format_base {
                     'help_component' => 'format_grid',
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
-                        array('value' => $defaults['defaultsectiontitlesummarybackgroundcolour'])
+                        array(
+                            'defaultvalue' => $defaults['defaultsectiontitlesummarybackgroundcolour'],
+                            'value' => $defaults['defaultsectiontitlesummarybackgroundcolour']
+                        )
                     )
                 );
+                $opacityvalues['-'] = new lang_string('default', 'format_grid', get_config('format_grid', 'defaultsectiontitlesummarybackgroundopacity'));
                 $courseformatoptionsedit['sectiontitlesummarybackgroundopacity'] = array(
                     'label' => new lang_string('sectiontitlesummarybackgroundopacity', 'format_grid'),
                     'element_type' => 'select',
-                    'element_attributes' => array(self::get_default_opacities()),
+                    'element_attributes' => array($opacityvalues),
                     'help' => 'sectiontitlesummarybackgroundopacity',
                     'help_component' => 'format_grid'
                 );
             } else {
-                $courseformatoptionsedit['hidesectiontitle'] = array('label' => get_config('format_grid', 'defaulthidesectiontitle'),
-                    'element_type' => 'hidden');
-                $courseformatoptionsedit['sectiontitlegridlengthmaxoption'] = array('label' => get_config('format_grid', 'defaultsectiontitlegridlengthmaxoption'),
-                    'element_type' => 'hidden');
-                $courseformatoptionsedit['sectiontitleboxposition'] = array('label' => get_config('format_grid', 'defaultsectiontitleboxposition'),
-                    'element_type' => 'hidden');
+                $courseformatoptionsedit['hidesectiontitle'] = array(
+                    'label' => 0, 'element_type' => 'hidden');
+                $courseformatoptionsedit['sectiontitlegridlengthmaxoption'] = array(
+                    'label' => '-', 'element_type' => 'hidden');
+                $courseformatoptionsedit['sectiontitleboxposition'] = array(
+                    'label' => 0, 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitleboxinsideposition'] = array(
-                    'label' => get_config('format_grid', 'defaultsectiontitleboxinsideposition'), 'element_type' => 'hidden');
+                    'label' => 0, 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitleboxheight'] = array(
-                    'label' => get_config('format_grid', 'defaultsectiontitleboxheight'), 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitleboxopacity'] = array(
-                    'label' => get_config('format_grid', 'defaultsectiontitleboxopacity'), 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitlefontsize'] = array(
-                    'label' => get_config('format_grid', 'defaultsectiontitlefontsize'), 'element_type' => 'hidden');
+                    'label' => 0, 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitlealignment'] = array(
-                    'label' => get_config('format_grid', 'defaultsectiontitlealignment'), 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitleinsidetitletextcolour'] = array(
-                    'label' => $defaults['defaultsectiontitleinsidetitletextcolour'], 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitleinsidetitlebackgroundcolour'] = array(
-                    'label' => $defaults['defaultsectiontitleinsidetitlebackgroundcolour'], 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['showsectiontitlesummary'] = array(
-                    'label' => get_config('format_grid', 'defaultshowsectiontitlesummary'), 'element_type' => 'hidden');
+                    'label' => 0, 'element_type' => 'hidden');
                 $courseformatoptionsedit['setshowsectiontitlesummaryposition'] = array(
-                    'label' => get_config('format_grid', 'defaultsetshowsectiontitlesummaryposition'), 'element_type' => 'hidden');
+                    'label' => 0, 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitlesummarymaxlength'] = array(
-                    'label' => get_config('format_grid', 'defaultsectiontitlesummarymaxlength'), 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitlesummarytextcolour'] = array(
-                    'label' => $defaults['defaultsectiontitlesummarytextcolour'], 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitlesummarybackgroundcolour'] = array(
-                    'label' => $defaults['defaultsectiontitlesummarybackgroundcolour'], 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
                 $courseformatoptionsedit['sectiontitlesummarybackgroundopacity'] = array(
-                    'label' => get_config('format_grid', 'defaultsectiontitlesummarybackgroundopacity'), 'element_type' => 'hidden');
+                    'label' => '-', 'element_type' => 'hidden');
             }
 
             $courseformatoptionsedit['newactivity'] = array(
@@ -1094,52 +1186,62 @@ class format_grid extends format_base {
                 'help_component' => 'format_grid'
             );
 
+            $fitsectioncontainertowindowvalues = $this->generate_default_entry(
+                'fitsectioncontainertowindow',
+                0,
+                array(
+                    1 => new lang_string('no'), // No.
+                    2 => new lang_string('yes') // Yes.
+                )
+            );
             $courseformatoptionsedit['fitsectioncontainertowindow'] = array(
                 'label' => new lang_string('setfitsectioncontainertowindow', 'format_grid'),
                 'help' => 'setfitsectioncontainertowindow',
                 'help_component' => 'format_grid',
                 'element_type' => 'select',
-                'element_attributes' => array(
-                    array(
-                        1 => new lang_string('no'), // No.
-                        2 => new lang_string('yes') // Yes.
-                    )
-                )
+                'element_attributes' => array($fitsectioncontainertowindowvalues)
             );
 
+            $greyouthiddenvalues = $this->generate_default_entry(
+                'greyouthidden',
+                0,
+                array(
+                    1 => new lang_string('no'), // No.
+                    2 => new lang_string('yes') // Yes.
+                )
+            );
             $courseformatoptionsedit['greyouthidden'] = array(
                 'label' => new lang_string('greyouthidden', 'format_grid'),
                 'help' => 'greyouthidden',
                 'help_component' => 'format_grid',
                 'element_type' => 'select',
-                'element_attributes' => array(
+                'element_attributes' => array($greyouthiddenvalues)
+            );
+
+            if (has_capability('format/grid:changeimagecontainernavigation', $context)) {
+                $setsection0ownpagenogridonesectionvalues = $this->generate_default_entry(
+                    'setsection0ownpagenogridonesection',
+                    0,
                     array(
                         1 => new lang_string('no'), // No.
                         2 => new lang_string('yes') // Yes.
                     )
-                )
-            );
-
-            if (has_capability('format/grid:changeimagecontainernavigation', $context)) {
+                );
                 $courseformatoptionsedit['setsection0ownpagenogridonesection'] = array(
                     'label' => new lang_string('setsection0ownpagenogridonesection', 'format_grid'),
                     'help' => 'setsection0ownpagenogridonesection',
                     'help_component' => 'format_grid',
                     'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            1 => new lang_string('no'), // No.
-                            2 => new lang_string('yes') // Yes.
-                        )
-                    )
+                    'element_attributes' => array($setsection0ownpagenogridonesectionvalues)
                 );
             } else {
-                $courseformatoptionsedit['setsection0ownpagenogridonesection'] = array('label' => get_config(
-                    'format_grid', 'defaultsection0ownpagenogridonesection'), 'element_type' => 'hidden');
+                $courseformatoptionsedit['setsection0ownpagenogridonesection'] = array(
+                    'label' => 0, 'element_type' => 'hidden');
             }
 
             $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
         }
+
         return $courseformatoptions;
     }
 
@@ -1182,6 +1284,21 @@ class format_grid extends format_base {
             $defaults['defaultsectiontitlesummarybackgroundcolour'] = substr($defaults['defaultsectiontitlesummarybackgroundcolour'], 1);
         }
         return $defaults;
+    }
+
+    /**
+     * Generates the default setting value entry.
+     *
+     * @param string $settingname Setting name.
+     * @param string/int $defaultindex Default index.
+     * @param array $values Setting value array to add the default entry to.
+     * @return array Updated value array with the added default entry.
+     */
+    private function generate_default_entry($settingname, $defaultindex, $values) {
+        $defaultvalue = get_config('format_grid', 'default'.$settingname);
+        $defarray = array($defaultindex => new lang_string('default', 'format_grid', $values[$defaultvalue]));
+
+        return array_replace($defarray, $values);
     }
 
     /**
@@ -1639,7 +1756,7 @@ class format_grid extends format_base {
                     ((!(($resetimageresizemethod) || ($resetallimageresizemethod))) &&
                     ($settings['imageresizemethod'] != $data->imageresizemethod))) {
                 /* Detect now and action later as 'setup_displayed_image' when called from 'update_displayed_images()' will need to
-                  use the new values. */
+                   use the new values. */
                 $changedisplayedimages = true;
             }
         }
@@ -1654,13 +1771,12 @@ class format_grid extends format_base {
                     if (array_key_exists($key, $oldcourse)) {
                         $data[$key] = $oldcourse[$key];
                     } else if ($key === 'numsections') {
-                        // If previous format does not have the field 'numsections'
-                        // and $data['numsections'] is not set,
-                        // we fill it with the maximum section number from the DB
+                        /* If previous format does not have the field 'numsections' and $data['numsections'] is not set,
+                           we fill it with the maximum section number from the DB. */
                         $maxsection = $DB->get_field_sql('SELECT max(section) from {course_sections}
                             WHERE course = ?', array($this->courseid));
                         if ($maxsection) {
-                            // If there are no sections, or just default 0-section, 'numsections' will be set to default
+                            // If there are no sections, or just default 0-section, 'numsections' will be set to default.
                             $data['numsections'] = $maxsection;
                         }
                     }
