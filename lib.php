@@ -641,8 +641,8 @@ class format_grid extends format_base {
                     'type' => PARAM_INT
                 ),
                 'sectiontitlegridlengthmaxoption' => array(
-                    'default' => 0,
-                    'type' => PARAM_INT
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'sectiontitleboxposition' => array(
                     'default' => 0,
@@ -653,16 +653,16 @@ class format_grid extends format_base {
                     'type' => PARAM_INT
                 ),
                 'sectiontitleboxheight' => array(
-                    'default' => 0,
-                    'type' => PARAM_INT
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'sectiontitleboxopacity' => array(
                     'default' => '-',
                     'type' => PARAM_RAW
                 ),
                 'sectiontitlefontsize' => array(
-                    'default' => 0,
-                    'type' => PARAM_INT
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'sectiontitlealignment' => array(
                     'default' => '-',
@@ -685,8 +685,8 @@ class format_grid extends format_base {
                     'type' => PARAM_INT
                 ),
                 'sectiontitlesummarymaxlength' => array(
-                    'default' => 0,
-                    'type' => PARAM_INT
+                    'default' => '-',
+                    'type' => PARAM_ALPHANUMEXT
                 ),
                 'sectiontitlesummarytextcolour' => array(
                     'default' => '-',
@@ -843,7 +843,7 @@ class format_grid extends format_base {
                     'element_attributes' => array(
                         array(
                             'defaultcolour' => $defaults['defaultbordercolour'],
-                            'value' => $$defaults['defaultbordercolour']
+                            'value' => $defaults['defaultbordercolour']
                         )
                     )
                 );
@@ -956,6 +956,7 @@ class format_grid extends format_base {
                     'help' => 'hidesectiontitle',
                     'help_component' => 'format_grid'
                 );
+
                 $courseformatoptionsedit['sectiontitlegridlengthmaxoption'] = array(
                     'label' => new lang_string('sectiontitlegridlengthmaxoption', 'format_grid'),
                     'element_type' => 'text',
@@ -996,6 +997,7 @@ class format_grid extends format_base {
                     'help' => 'sectiontitleboxinsideposition',
                     'help_component' => 'format_grid'
                 );
+
                 $courseformatoptionsedit['sectiontitleboxheight'] = array(
                     'label' => new lang_string('sectiontitleboxheight', 'format_grid'),
                     'element_type' => 'text',
@@ -1017,7 +1019,7 @@ class format_grid extends format_base {
 
                 $sectiontitlefontsizevalues = $this->generate_default_entry(
                     'sectiontitlefontsize',
-                    0,
+                    '-',
                     self::get_default_section_font_sizes()
                 );
                 $courseformatoptionsedit['sectiontitlefontsize'] = array(
@@ -1053,6 +1055,7 @@ class format_grid extends format_base {
                         )
                     )
                 );
+
                 $courseformatoptionsedit['sectiontitleinsidetitlebackgroundcolour'] = array(
                     'label' => new lang_string('sectiontitleinsidetitlebackgroundcolour', 'format_grid'),
                     'help' => 'sectiontitleinsidetitlebackgroundcolour',
@@ -1092,6 +1095,7 @@ class format_grid extends format_base {
                         4 => new lang_string('right', 'format_grid')
                     )
                 );
+
                 $courseformatoptionsedit['setshowsectiontitlesummaryposition'] = array(
                     'label' => new lang_string('setshowsectiontitlesummaryposition', 'format_grid'),
                     'element_type' => 'select',
@@ -1099,6 +1103,7 @@ class format_grid extends format_base {
                     'help' => 'setshowsectiontitlesummaryposition',
                     'help_component' => 'format_grid'
                 );
+
                 $courseformatoptionsedit['sectiontitlesummarymaxlength'] = array(
                     'label' => new lang_string('sectiontitlesummarymaxlength', 'format_grid'),
                     'element_type' => 'text',
@@ -1106,6 +1111,7 @@ class format_grid extends format_base {
                     'help' => 'sectiontitlesummarymaxlength',
                     'help_component' => 'format_grid'
                 );
+
                 $courseformatoptionsedit['sectiontitlesummarytextcolour'] = array(
                     'label' => new lang_string('sectiontitlesummarytextcolour', 'format_grid'),
                     'help' => 'sectiontitlesummarytextcolour',
@@ -1118,6 +1124,7 @@ class format_grid extends format_base {
                         )
                     )
                 );
+
                 $courseformatoptionsedit['sectiontitlesummarybackgroundcolour'] = array(
                     'label' => new lang_string('sectiontitlesummarybackgroundcolour', 'format_grid'),
                     'help' => 'sectiontitlesummarybackgroundcolour',
@@ -1130,6 +1137,7 @@ class format_grid extends format_base {
                         )
                     )
                 );
+
                 $opacityvalues['-'] = new lang_string('default', 'format_grid', get_config('format_grid', 'defaultsectiontitlesummarybackgroundopacity'));
                 $courseformatoptionsedit['sectiontitlesummarybackgroundopacity'] = array(
                     'label' => new lang_string('sectiontitlesummarybackgroundopacity', 'format_grid'),
@@ -1220,7 +1228,7 @@ class format_grid extends format_base {
 
             if (has_capability('format/grid:changeimagecontainernavigation', $context)) {
                 $setsection0ownpagenogridonesectionvalues = $this->generate_default_entry(
-                    'setsection0ownpagenogridonesection',
+                    'section0ownpagenogridonesection',
                     0,
                     array(
                         1 => new lang_string('no'), // No.
@@ -1606,7 +1614,9 @@ class format_grid extends format_base {
      * @return true|false
      */
     private function validate_colour($data) {
-        if (preg_match('/^#?([[:xdigit:]]{3}){1,2}$/', $data)) {
+        if ($data == '-') {
+            return true;
+        } else if (preg_match('/^#?([[:xdigit:]]{3}){1,2}$/', $data)) {
             return true;
         } else {
             return false;
@@ -1947,59 +1957,57 @@ class format_grid extends format_base {
         $updatenewactivity = false;
         $updatefitpopup = false;
         if ($imagecontaineralignmentreset && has_capability('format/grid:changeimagecontaineralignment', $context) && $resetallifall) {
-            $updatedata['imagecontaineralignment'] = get_config('format_grid', 'defaultimagecontaineralignment');
+            $updatedata['imagecontaineralignment'] = '-';
             $updateimagecontaineralignment = true;
         }
         if ($imagecontainernavigationreset && has_capability('format/grid:changeimagecontainernavigation', $context) && $resetallifall) {
-            $updatedata['setsection0ownpagenogridonesection'] = get_config('format_grid', 'defaultsection0ownpagenogridonesection');
+            $updatedata['setsection0ownpagenogridonesection'] = 0;
             $updateimagecontainernavigation = true;
         }
         if ($imagecontainersizereset && has_capability('format/grid:changeimagecontainersize', $context) && $resetallifall) {
-            $updatedata['imagecontainerwidth'] = get_config('format_grid', 'defaultimagecontainerwidth');
-            $updatedata['imagecontainerratio'] = get_config('format_grid', 'defaultimagecontainerratio');
+            $updatedata['imagecontainerwidth'] = 0;
+            $updatedata['imagecontainerratio'] = '-';
             $updateimagecontainersize = true;
         }
         if ($imageresizemethodreset && has_capability('format/grid:changeimageresizemethod', $context) && $resetallifall) {
-            $updatedata['imageresizemethod'] = get_config('format_grid', 'defaultimageresizemethod');
+            $updatedata['imageresizemethod'] = 0;
             $updateimageresizemethod = true;
         }
         if ($imagecontainerstylereset && has_capability('format/grid:changeimagecontainerstyle', $context) && $resetallifall) {
-            $updatedata['bordercolour'] = get_config('format_grid', 'defaultbordercolour');
-            $updatedata['borderwidth'] = get_config('format_grid', 'defaultborderwidth');
-            $updatedata['borderradius'] = get_config('format_grid', 'defaultborderradius');
-            $updatedata['imagecontainerbackgroundcolour'] = get_config('format_grid', 'defaultimagecontainerbackgroundcolour');
-            $updatedata['currentselectedsectioncolour'] = get_config('format_grid', 'defaultcurrentselectedsectioncolour');
-            $updatedata['currentselectedimagecontainertextcolour'] = get_config('format_grid',
-                    'defaultcurrentselectedimagecontainertextcolour');
-            $updatedata['currentselectedimagecontainercolour'] = get_config('format_grid',
-                    'defaultcurrentselectedimagecontainercolour');
+            $updatedata['bordercolour'] = '-';
+            $updatedata['borderwidth'] = 0;
+            $updatedata['borderradius'] = 0;
+            $updatedata['imagecontainerbackgroundcolour'] = '-';
+            $updatedata['currentselectedsectioncolour'] = '-';
+            $updatedata['currentselectedimagecontainertextcolour'] = '-';
+            $updatedata['currentselectedimagecontainercolour'] = '-';
             $updateimagecontainerstyle = true;
         }
         if ($sectiontitleoptionsreset && has_capability('format/grid:changesectiontitleoptions', $context) && $resetallifall) {
-            $updatedata['hidesectiontitle'] = get_config('format_grid', 'defaulthidesectiontitle');
-            $updatedata['sectiontitlegridlengthmaxoption'] = get_config('format_grid', 'defaultsectiontitlegridlengthmaxoption');
-            $updatedata['sectiontitleboxposition'] = get_config('format_grid', 'defaultsectiontitleboxposition');
-            $updatedata['sectiontitleboxinsideposition'] = get_config('format_grid', 'defaultsectiontitleboxinsideposition');
-            $updatedata['sectiontitleboxheight'] = get_config('format_grid', 'defaultsectiontitleboxheight');
-            $updatedata['sectiontitleboxopacity'] = get_config('format_grid', 'defaultsectiontitleboxopacity');
-            $updatedata['sectiontitlefontsize'] = get_config('format_grid', 'defaultsectiontitlefontsize');
-            $updatedata['sectiontitlealignment'] = get_config('format_grid', 'defaultsectiontitlealignment');
-            $updatedata['sectiontitleinsidetitletextcolour'] = get_config('format_grid', 'defaultsectiontitleinsidetitletextcolour');
-            $updatedata['sectiontitleinsidetitlebackgroundcolour'] = get_config('format_grid', 'defaultsectiontitleinsidetitlebackgroundcolour');
-            $updatedata['showsectiontitlesummary'] = get_config('format_grid', 'defaultshowsectiontitlesummary');
-            $updatedata['setshowsectiontitlesummaryposition'] = get_config('format_grid', 'defaultsetshowsectiontitlesummaryposition');
-            $updatedata['sectiontitlesummarymaxlength'] = get_config('format_grid', 'defaultsectiontitlesummarymaxlength');
-            $updatedata['sectiontitlesummarytextcolour'] = get_config('format_grid', 'defaultsectiontitlesummarytextcolour');
-            $updatedata['sectiontitlesummarybackgroundcolour'] = get_config('format_grid', 'defaultsectiontitlesummarybackgroundcolour');
-            $updatedata['sectiontitlesummarybackgroundopacity'] = get_config('format_grid', 'defaultsectiontitlesummarybackgroundopacity');
+            $updatedata['hidesectiontitle'] = 0;
+            $updatedata['sectiontitlegridlengthmaxoption'] = '-';
+            $updatedata['sectiontitleboxposition'] = 0;
+            $updatedata['sectiontitleboxinsideposition'] = 0;
+            $updatedata['sectiontitleboxheight'] = '-';
+            $updatedata['sectiontitleboxopacity'] = '-';
+            $updatedata['sectiontitlefontsize'] = '-';
+            $updatedata['sectiontitlealignment'] = '-';
+            $updatedata['sectiontitleinsidetitletextcolour'] = '-';
+            $updatedata['sectiontitleinsidetitlebackgroundcolour'] = '-';
+            $updatedata['showsectiontitlesummary'] = 0;
+            $updatedata['setshowsectiontitlesummaryposition'] = 0;
+            $updatedata['sectiontitlesummarymaxlength'] = '-';
+            $updatedata['sectiontitlesummarytextcolour'] = '-';
+            $updatedata['sectiontitlesummarybackgroundcolour'] = '-';
+            $updatedata['sectiontitlesummarybackgroundopacity'] = '-';
             $updatesectiontitleoptions = true;
         }
         if ($newactivityreset && $resetallifall) {
-            $updatedata['newactivity'] = get_config('format_grid', 'defaultnewactivity');
+            $updatedata['newactivity'] = 0;
             $updatenewactivity = true;
         }
         if ($fitpopupreset && $resetallifall) {
-            $updatedata['fitsectioncontainertowindow'] = get_config('format_grid', 'defaultfitsectioncontainertowindow');
+            $updatedata['fitsectioncontainertowindow'] = 0;
             $updatefitpopup = true;
         }
 
