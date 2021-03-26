@@ -2036,9 +2036,6 @@ class format_grid extends format_base {
                     $courseformat->settings = null;
                     $newsettings = $courseformat->get_settings();
 
-error_log('cs: '.print_r($currentsettings, true));
-error_log('ns: '.print_r($newsettings, true));
-
                     if (($updateimagecontainersize) &&
                             (($currentsettings['imagecontainerwidth'] != $newsettings['imagecontainerwidth']) ||
                             ($currentsettings['imagecontainerratio'] != $newsettings['imagecontainerratio']))) {
@@ -2384,8 +2381,6 @@ error_log('ns: '.print_r($newsettings, true));
             }
 
             $displayedimageinfo = $this->get_displayed_image_container_properties($settings);
-error_log(print_r($displayedimageinfo, true));
-error_log(print_r($settings, true));
             $tmproot = make_temp_directory('gridformatdisplayedimagecontainer');
             $tmpfilepath = $tmproot . '/' . $imagecontainerpathfile->get_contenthash();
             $imagecontainerpathfile->copy_content_to($tmpfilepath);
