@@ -722,7 +722,6 @@ class format_grid extends format_base {
             /* Note: Because 'admin_setting_configcolourpicker' in 'settings.php' needs to use a prefixing '#'
               this needs to be stripped off here if it's there for the format's specific colour picker. */
             $defaults = $this->get_course_format_colour_defaults();
-
             $context = $this->get_context();
 
             if (is_null($courseconfig)) {
@@ -892,7 +891,7 @@ class format_grid extends format_base {
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
                         array(
-                            'defaultvalue' => $defaults['defaultcurrentselectedsectioncolour'],
+                            'defaultcolour' => $defaults['defaultcurrentselectedsectioncolour'],
                             'value' => $defaults['defaultcurrentselectedsectioncolour']
                         )
                     )
@@ -905,7 +904,7 @@ class format_grid extends format_base {
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
                         array(
-                            'defaultvalue' => $defaults['defaultcurrentselectedimagecontainertextcolour'],
+                            'defaultcolour' => $defaults['defaultcurrentselectedimagecontainertextcolour'],
                             'value' => $defaults['defaultcurrentselectedimagecontainertextcolour']
                         )
                     )
@@ -918,7 +917,7 @@ class format_grid extends format_base {
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
                         array(
-                            'defaultvalue' => $defaults['defaultcurrentselectedimagecontainercolour'],
+                            'defaultcolour' => $defaults['defaultcurrentselectedimagecontainercolour'],
                             'value' => $defaults['defaultcurrentselectedimagecontainercolour']
                         )
                     )
@@ -1050,7 +1049,7 @@ class format_grid extends format_base {
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
                         array(
-                            'defaultvalue' => $defaults['defaultsectiontitleinsidetitletextcolour'],
+                            'defaultcolour' => $defaults['defaultsectiontitleinsidetitletextcolour'],
                             'value' => $defaults['defaultsectiontitleinsidetitletextcolour']
                         )
                     )
@@ -1063,7 +1062,7 @@ class format_grid extends format_base {
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
                         array(
-                            'defaultvalue' => $defaults['defaultsectiontitleinsidetitlebackgroundcolour'],
+                            'defaultcolour' => $defaults['defaultsectiontitleinsidetitlebackgroundcolour'],
                             'value' => $defaults['defaultsectiontitleinsidetitlebackgroundcolour']
                         )
                     )
@@ -1119,7 +1118,7 @@ class format_grid extends format_base {
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
                         array(
-                            'defaultvalue' => $defaults['defaultsectiontitlesummarytextcolour'],
+                            'defaultcolour' => $defaults['defaultsectiontitlesummarytextcolour'],
                             'value' => $defaults['defaultsectiontitlesummarytextcolour']
                         )
                     )
@@ -1132,7 +1131,7 @@ class format_grid extends format_base {
                     'element_type' => 'gfcolourpopup',
                     'element_attributes' => array(
                         array(
-                            'defaultvalue' => $defaults['defaultsectiontitlesummarybackgroundcolour'],
+                            'defaultcolour' => $defaults['defaultsectiontitlesummarybackgroundcolour'],
                             'value' => $defaults['defaultsectiontitlesummarybackgroundcolour']
                         )
                     )
@@ -1630,7 +1629,9 @@ class format_grid extends format_base {
      * @return true|false
      */
     private function validate_opacity($data) {
-        if (array_key_exists($data, self::$opacities)) {
+        if ($data == '-') {
+            return true;
+        } else if (array_key_exists($data, self::$opacities)) {
             return true;
         } else {
             return false;
@@ -1644,7 +1645,9 @@ class format_grid extends format_base {
      * @return true|false
      */
     private function validate_section_title_font_size($data) {
-        if (array_key_exists($data, self::$sectiontitlefontsizes)) {
+        if ($data == '-') {
+            return true;
+        } else if (array_key_exists($data, self::$sectiontitlefontsizes)) {
             return true;
         } else {
             return false;
@@ -2861,6 +2864,9 @@ class format_grid extends format_base {
      * @return array
      */
     public static function hex2rgb($hex) {
+        if ($hex[0] == '#') {
+            $hex = substr($hex, 1);
+        }
         if (strlen($hex) == 3) {
             $r = substr($hex, 0, 1);
             $r .= $r;
