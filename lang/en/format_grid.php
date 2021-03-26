@@ -74,7 +74,7 @@ $string['numbersections'] = 'Number of sections';
 
 // Exception messages.
 $string['cannotfinduploadedimage'] = 'Cannot find the uploaded original image.  Please report error details and the information contained in the php.log file to developer.  Refresh the page and upload a fresh copy of the image.';
-$string['cannotconvertuploadedimagetodisplayedimage'] = 'Cannot convert uploaded image to displayed image.  Please report error details and the information contained in the php.log file to developer.';
+$string['cannotconvertuploadedimagetodisplayedimage'] = 'Cannot convert uploaded image to displayed image - {$a}.  Please report error details and the information contained in the php.log file to developer.';
 $string['cannotgetimagelock'] = 'Cannot get image lock.  Please report error details to developer.';
 $string['cannotgetimagesforcourse'] = 'Cannot get images for course.  Please report error details to developer.';
 $string['cannotgetsummarylock'] = 'Cannot get summary lock.  Please report error details to developer.';

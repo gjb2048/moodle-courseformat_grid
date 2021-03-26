@@ -2023,46 +2023,48 @@ class format_grid extends format_base {
                 ($updatesectiontitleoptions) ||
                 ($updatenewactivity) ||
                 ($updatefitpopup)) {
-                $ourcourseid = $this->courseid;
-                $this->courseid = $record->id;
+
+                if ($record->id !== $this->courseid) {
+                    $courseformat = course_get_format($record->id);
+                } else {
+                    $courseformat = $this;
+                }
                 if (($updateimagecontainersize) || ($updateimageresizemethod)) {
-                    $courseformat = null;
-                    if ($ourcourseid !== $this->courseid) {
-                        $courseformat = course_get_format($this->courseid);
-                        $currentsettings = $courseformat->get_settings();
-                    } else {
-                        $currentsettings = $this->get_settings();
-                        $courseformat = $this;
-                    }
+                    $currentsettings = $courseformat->get_settings();
+                    $courseformat->update_format_options($updatedata);
+                    // Ensure we get the new values.
+                    $courseformat->settings = null;
+                    $newsettings = $courseformat->get_settings();
+
+error_log('cs: '.print_r($currentsettings, true));
+error_log('ns: '.print_r($newsettings, true));
 
                     if (($updateimagecontainersize) &&
-                            (($currentsettings['imagecontainerwidth'] != $updatedata['imagecontainerwidth']) ||
-                            ($currentsettings['imagecontainerratio'] != $updatedata['imagecontainerratio']))) {
+                            (($currentsettings['imagecontainerwidth'] != $newsettings['imagecontainerwidth']) ||
+                            ($currentsettings['imagecontainerratio'] != $newsettings['imagecontainerratio']))) {
                         $performimagecontainersize = true; // Variable $updatedata will be correct.
                     } else {
                         // If image resize method needs to operate so use current settings.
-                        $updatedata['imagecontainerwidth'] = $currentsettings['imagecontainerwidth'];
-                        $updatedata['imagecontainerratio'] = $currentsettings['imagecontainerratio'];
+                        $newsettings['imagecontainerwidth'] = $currentsettings['imagecontainerwidth'];
+                        $newsettings['imagecontainerratio'] = $currentsettings['imagecontainerratio'];
                         $performimagecontainersize = false;
                     }
 
                     if (($updateimageresizemethod) &&
-                            ($currentsettings['imageresizemethod'] != $updatedata['imageresizemethod'])) {
+                            ($currentsettings['imageresizemethod'] != $newsettings['imageresizemethod'])) {
                         $performimageresizemethod = true; // Variable $updatedata will be correct.
                     } else {
                         // If image container size needs to operate so use current setting.
-                        $updatedata['imageresizemethod'] = $currentsettings['imageresizemethod'];
+                        $newsettings['imageresizemethod'] = $currentsettings['imageresizemethod'];
                         $performimageresizemethod = false;
                     }
 
                     if (($performimagecontainersize) || ($performimageresizemethod)) {
-                        // No need to get the settings as parsing the updated ones, but do need to invalidate them.
-                        $courseformat->settings = null;
-                        $courseformat->update_displayed_images($record->id, $courseformat, $updatedata, false);
+                        $courseformat->update_displayed_images($record->id, $courseformat, $newsettings, false);
                     }
+                } else {
+                    $courseformat->update_format_options($updatedata);
                 }
-                $this->update_format_options($updatedata);
-                $this->courseid = $ourcourseid;
             }
         }
     }
@@ -2382,7 +2384,8 @@ class format_grid extends format_base {
             }
 
             $displayedimageinfo = $this->get_displayed_image_container_properties($settings);
-
+error_log(print_r($displayedimageinfo, true));
+error_log(print_r($settings, true));
             $tmproot = make_temp_directory('gridformatdisplayedimagecontainer');
             $tmpfilepath = $tmproot . '/' . $imagecontainerpathfile->get_contenthash();
             $imagecontainerpathfile->copy_content_to($tmpfilepath);
@@ -2447,10 +2450,12 @@ class format_grid extends format_base {
                 }
                 $DB->set_field('format_grid_icon', 'displayedimageindex', $sectionimage->displayedimageindex,
                     array('sectionid' => $sectionimage->sectionid));
+error_log('suc '.print_r($sectionimage, true));
+$e = new \Exception;
+error_log($e->getTraceAsString());
             } else {
-                // TODO: Determine if this can actually be called.
                 print_error('cannotconvertuploadedimagetodisplayedimage', 'format_grid',
-                        $CFG->wwwroot . "/course/view.php?id=" . $this->courseid);
+                    $CFG->wwwroot."/course/view.php?id=".$this->courseid, print_r($sectionimage, true));
             }
         } else {
             $DB->set_field('format_grid_icon', 'image', null, array('sectionid' => $sectionimage->sectionid));
