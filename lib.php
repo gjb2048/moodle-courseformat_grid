@@ -1180,15 +1180,18 @@ class format_grid extends format_base {
                     'label' => '-', 'element_type' => 'hidden');
             }
 
+            $newactivityvalues = $this->generate_default_entry(
+                'newactivity',
+                0,
+                array(
+                    1 => new lang_string('no'), // No.
+                    2 => new lang_string('yes') // Yes.
+                )
+            );
             $courseformatoptionsedit['newactivity'] = array(
                 'label' => new lang_string('setnewactivity', 'format_grid'),
                 'element_type' => 'select',
-                'element_attributes' => array(
-                    array(
-                        1 => new lang_string('no'), // No.
-                        2 => new lang_string('yes') // Yes.
-                    )
-                ),
+                'element_attributes' => array($newactivityvalues),
                 'help' => 'setnewactivity',
                 'help_component' => 'format_grid'
             );
@@ -1454,6 +1457,10 @@ class format_grid extends format_base {
             $checkboxname = get_string('resetfitpopup', 'format_grid');
             $resetelements[] = & $mform->createElement('checkbox', 'resetfitpopup', '', $checkboxname);
             $resetelements[] = & $mform->createElement('html', $OUTPUT->help_icon('resetfitpopup', 'format_grid'));
+
+            $checkboxname = get_string('resetgreyouthidden', 'format_grid');
+            $resetelements[] = & $mform->createElement('checkbox', 'resetgreyouthidden', '', $checkboxname);
+            $resetelements[] = & $mform->createElement('html', $OUTPUT->help_icon('resetgreyouthidden', 'format_grid'));
         } else {
             $checkboxname = get_string('resetnewactivity', 'format_grid').
                 $OUTPUT->help_icon('resetnewactivity', 'format_grid');
@@ -1461,7 +1468,11 @@ class format_grid extends format_base {
 
             $checkboxname = get_string('resetfitpopup', 'format_grid').
                 $OUTPUT->help_icon('resetfitpopup', 'format_grid');
-            $resetelements[] = & $mform->createElement('checkbox', 'resepopup', '', $checkboxname);
+            $resetelements[] = & $mform->createElement('checkbox', 'resetpopup', '', $checkboxname);
+
+            $checkboxname = get_string('resetgreyouthidden', 'format_grid').
+                $OUTPUT->help_icon('resetgreyouthidden', 'format_grid');
+            $resetelements[] = & $mform->createElement('checkbox', 'resetgreyouthidden', '', $checkboxname);
         }
         $elements[] = $mform->addGroup($resetelements, 'resetgroup', get_string('resetgrp', 'format_grid'), null, false);
 
@@ -1500,6 +1511,10 @@ class format_grid extends format_base {
                 $checkboxname = get_string('resetallfitpopup', 'format_grid');
                 $resetallelements[] = & $mform->createElement('checkbox', 'resetallfitpopup', '', $checkboxname);
                 $resetallelements[] = & $mform->createElement('html', $OUTPUT->help_icon('resetallfitpopup', 'format_grid'));
+
+                $checkboxname = get_string('resetallgreyouthidden', 'format_grid');
+                $resetallelements[] = & $mform->createElement('checkbox', 'resetallgreyouthidden', '', $checkboxname);
+                $resetallelements[] = & $mform->createElement('html', $OUTPUT->help_icon('resetallgreyouthidden', 'format_grid'));
             } else {
                 $checkboxname = get_string('resetallimagecontaineralignment', 'format_grid').
                     $OUTPUT->help_icon('resetallimagecontaineralignment', 'format_grid');
@@ -1532,6 +1547,10 @@ class format_grid extends format_base {
                 $checkboxname = get_string('resetallfitpopup', 'format_grid').
                     $OUTPUT->help_icon('resetallfitpopup', 'format_grid');
                 $resetallelements[] = & $mform->createElement('checkbox', 'resetallfitpopup', '', $checkboxname);
+
+                $checkboxname = get_string('resetallgreyouthidden', 'format_grid').
+                    $OUTPUT->help_icon('resetallgreyouthidden', 'format_grid');
+                $resetallelements[] = & $mform->createElement('checkbox', 'resetallgreyouthidden', '', $checkboxname);
             }
 
             $elements[] = $mform->addGroup($resetallelements, 'resetallgroup', get_string('resetallgrp', 'format_grid'), null,
@@ -1681,6 +1700,7 @@ class format_grid extends format_base {
         $resetsectiontitleoptions = false;
         $resetnewactivity = false;
         $resetfitpopup = false;
+        $resetgreyouthidden = false;
         $resetallimagecontaineralignment = false;
         $resetallimagecontainernavigation = false;
         $resetallimagecontainersize = false;
@@ -1689,7 +1709,7 @@ class format_grid extends format_base {
         $resetallsectiontitleoptions = false;
         $resetallnewactivity = false;
         $resetallfitpopup = false;
-        $resetgreyouthidden = false;
+        $resetallgreyouthidden = false;
         if (isset($data->resetimagecontaineralignment) == true) {
             $resetimagecontaineralignment = true;
             unset($data->resetimagecontaineralignment);
@@ -1721,6 +1741,10 @@ class format_grid extends format_base {
         if (isset($data->resetfitpopup) == true) {
             $resetfitpopup = true;
             unset($data->resetfitpopup);
+        }
+        if (isset($data->resetgreyouthidden) == true) {
+            $resetgreyouthidden = true;
+            unset($data->resetgreyouthidden);
         }
         if (isset($data->resetallimagecontaineralignment) == true) {
             $resetallimagecontaineralignment = true;
@@ -1754,9 +1778,9 @@ class format_grid extends format_base {
             $resetfitpopup = true;
             unset($data->resetallfitpopup);
         }
-        if (isset($data->resetgreyouthidden) == true) {
-            $resetgreyouthidden = true;
-            unset($data->resetgreyouthidden);
+        if (isset($data->resetallgreyouthidden) == true) {
+            $resetallgreyouthidden = true;
+            unset($data->resetallgreyouthidden);
         }
 
         $settings = $this->get_settings();
@@ -1826,22 +1850,25 @@ class format_grid extends format_base {
             ($resetallimagecontainerstyle) ||
             ($resetallsectiontitleoptions) ||
             ($resetallnewactivity) ||
-            ($resetallfitpopup)) {
+            ($resetallfitpopup) ||
+            ($resetallgreyouthidden)) {
             $this->reset_grid_setting(0, $resetallimagecontaineralignment, $resetallimagecontainernavigation,
                 $resetallimagecontainersize, $resetallimageresizemethod, $resetallimagecontainerstyle,
-                $resetallsectiontitleoptions, $resetallnewactivity, $resetallfitpopup);
+                $resetallsectiontitleoptions, $resetallnewactivity, $resetallfitpopup, $resetallgreyouthidden);
             $changes = true;
         } else if (
             ($resetimagecontaineralignment) ||
+            ($resetimagecontainernavigation) ||
             ($resetimagecontainersize) ||
             ($resetimageresizemethod) ||
             ($resetimagecontainerstyle) ||
             ($resetsectiontitleoptions) ||
             ($resetnewactivity) ||
-            ($resetfitpopup)) {
+            ($resetfitpopup) ||
+            ($resetgreyouthidden)) {
             $this->reset_grid_setting($this->courseid, $resetimagecontaineralignment, $resetimagecontainernavigation,
                 $resetimagecontainersize, $resetimageresizemethod, $resetimagecontainerstyle,
-                $resetsectiontitleoptions, $resetnewactivity, $resetfitpopup);
+                $resetsectiontitleoptions, $resetnewactivity, $resetfitpopup, $resetgreyouthidden);
             $changes = true;
         }
 
@@ -1934,10 +1961,11 @@ class format_grid extends format_base {
      * @param int $sectiontitleoptionsreset If true, reset the section title options to the default in the settings for the format.
      * @param int $newactivityreset If true, reset the new activity to the default in the settings for the format.
      * @param int $fitpopupreset If true, reset the fit popup to the default in the settings for the format.
+     * @param int $greyouthidden If true, reset the greyout hidden to the default in the settings for the format.
      */
     public function reset_grid_setting($courseid, $imagecontaineralignmentreset, $imagecontainernavigationreset,
         $imagecontainersizereset, $imageresizemethodreset, $imagecontainerstylereset, $sectiontitleoptionsreset,
-        $newactivityreset, $fitpopupreset) {
+        $newactivityreset, $fitpopupreset, $greyouthidden) {
         global $DB, $USER;
 
         $context = $this->get_context();
@@ -1959,6 +1987,7 @@ class format_grid extends format_base {
         $updatesectiontitleoptions = false;
         $updatenewactivity = false;
         $updatefitpopup = false;
+        $updategreyouthidden = false;
         if ($imagecontaineralignmentreset && has_capability('format/grid:changeimagecontaineralignment', $context) && $resetallifall) {
             $updatedata['imagecontaineralignment'] = '-';
             $updateimagecontaineralignment = true;
@@ -2013,6 +2042,10 @@ class format_grid extends format_base {
             $updatedata['fitsectioncontainertowindow'] = 0;
             $updatefitpopup = true;
         }
+        if ($greyouthidden && $resetallifall) {
+            $updatedata['greyouthidden'] = 0;
+            $updategreyouthidden = true;
+        }
 
         foreach ($records as $record) {
             if (($updateimagecontaineralignment) ||
@@ -2022,7 +2055,8 @@ class format_grid extends format_base {
                 ($updateimagecontainerstyle) ||
                 ($updatesectiontitleoptions) ||
                 ($updatenewactivity) ||
-                ($updatefitpopup)) {
+                ($updatefitpopup) ||
+                ($updategreyouthidden)) {
 
                 if ($record->id !== $this->courseid) {
                     $courseformat = course_get_format($record->id);

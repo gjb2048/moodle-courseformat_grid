@@ -304,8 +304,8 @@ if ($ADMIN->fulltree) {
 
     // Grey out hidden sections.
     $name = 'format_grid/defaultgreyouthidden';
-    $title = get_string('greyouthidden', 'format_grid');
-    $description = get_string('greyouthidden_desc', 'format_grid');
+    $title = get_string('defaultgreyouthidden', 'format_grid');
+    $description = get_string('defaultgreyouthidden_desc', 'format_grid');
     $default = 1;
     $choices = array(
         1 => new lang_string('no'),   // No.

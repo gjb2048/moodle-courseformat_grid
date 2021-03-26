@@ -276,8 +276,9 @@ $string['resetfitpopup_help'] = 'Resets the \'Fit section popup to the window\' 
 $string['resetallfitpopup'] = 'Fit section popups to the window';
 $string['resetallfitpopup_help'] = 'Resets the \'Fit section popup to the window\' to the default value for all courses so it will be the same as a course the first time it is in the Grid format.';
 $string['resetgreyouthidden'] = 'Grey out unavailable';
-$string['resetgreyouthidden_desc'] = 'Resets the property \'Grid display show unavailable section images in grey and unlinked.\'';
-$string['resetgreyouthidden_help'] = 'Resets the property \'In Grid display show unavailable section images in grey and unlinked.\'';
+$string['resetgreyouthidden_help'] = 'Resets the property \'In Grid display show unavailable section images in grey and unlinked.\ to the default value so it will be the same as a course the first time it is in the Grid format.';
+$string['resetallgreyouthidden'] = 'Grey out unavailables';
+$string['resetallgreyouthidden_help'] = 'Resets the property \'In Grid display show unavailable section images in grey and unlinked.\' to the default value for all courses so it will be the same as a course the first time it is in the Grid format.';
 
 // Section 0 on own page when out of the grid and course layout is 'Show one section per page'.
 $string['setsection0ownpagenogridonesection'] = 'Section 0 on its own page when out of the grid and on a single section page';
@@ -299,8 +300,9 @@ $string['grid:changesectiontitleoptions'] = 'Change or reset the section title o
 
 // Other.
 $string['greyouthidden'] = 'Grey out unavailable';
-$string['greyouthidden_desc'] = 'In Grid display show unavailable section images in grey and unlinked.';
 $string['greyouthidden_help'] = 'In Grid display show unavailable section images in grey and unlinked.';
+$string['defaultgreyouthidden'] = 'Grey out unavailable';
+$string['defaultgreyouthidden_desc'] = 'In Grid display show unavailable section images in grey and unlinked.';
 
 $string['custommousepointers'] = 'Use custom mouse pointers';
 $string['custommousepointers_desc'] = 'In Grid use custom mouse pointers.';
