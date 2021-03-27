@@ -1785,17 +1785,12 @@ class format_grid extends format_base {
 
         $settings = $this->get_settings();
         $changedisplayedimages = false;
+        $imageschanged = false;
         if (isset($data->imagecontainerwidth)) {
-            // We are have the CONTRIB-4099 options and this is not from a pre-CONTRIB-4099 backup file.
-            if (((!(($resetimagecontainersize) || ($resetallimagecontainersize))) &&
-                    (($settings['imagecontainerwidth'] != $data->imagecontainerwidth) ||
-                     ($settings['imagecontainerratio'] != $data->imagecontainerratio))) ||
-                    ((!(($resetimageresizemethod) || ($resetallimageresizemethod))) &&
-                    ($settings['imageresizemethod'] != $data->imageresizemethod))) {
-                /* Detect now and action later as 'setup_displayed_image' when called from 'update_displayed_images()' will need to
-                   use the new values. */
-                $changedisplayedimages = true;
-            }
+            /* We are have the CONTRIB-4099 options and this is not from a pre-CONTRIB-4099 backup file, so update if a reset
+               does not do that as 'setup_displayed_image' when called from 'update_displayed_images()' will need to use the
+               new values. */
+            $changedisplayedimages = true;
         }
 
         $data = (array) $data;
@@ -1834,14 +1829,6 @@ class format_grid extends format_base {
             }
         }
 
-        // Now we can change the displayed images if needed.
-        if ($changedisplayedimages) {
-            $this->settings = null; // Invalidate as changed.
-            $settings = $this->get_settings();
-
-            $this->update_displayed_images($this->courseid, $this, $settings, true);
-        }
-
         // Now we can do the reset.
         if (($resetallimagecontaineralignment) ||
             ($resetallimagecontainernavigation) ||
@@ -1852,7 +1839,7 @@ class format_grid extends format_base {
             ($resetallnewactivity) ||
             ($resetallfitpopup) ||
             ($resetallgreyouthidden)) {
-            $this->reset_grid_setting(0, $resetallimagecontaineralignment, $resetallimagecontainernavigation,
+            $imageschanged = $this->reset_grid_setting(0, $resetallimagecontaineralignment, $resetallimagecontainernavigation,
                 $resetallimagecontainersize, $resetallimageresizemethod, $resetallimagecontainerstyle,
                 $resetallsectiontitleoptions, $resetallnewactivity, $resetallfitpopup, $resetallgreyouthidden);
             $changes = true;
@@ -1866,10 +1853,18 @@ class format_grid extends format_base {
             ($resetnewactivity) ||
             ($resetfitpopup) ||
             ($resetgreyouthidden)) {
-            $this->reset_grid_setting($this->courseid, $resetimagecontaineralignment, $resetimagecontainernavigation,
+            $imageschanged = $this->reset_grid_setting($this->courseid, $resetimagecontaineralignment, $resetimagecontainernavigation,
                 $resetimagecontainersize, $resetimageresizemethod, $resetimagecontainerstyle,
                 $resetsectiontitleoptions, $resetnewactivity, $resetfitpopup, $resetgreyouthidden);
             $changes = true;
+        }
+
+        // Now we can change the displayed images if needed.
+        if ($changedisplayedimages && (!$imageschanged)) {
+            $this->settings = null; // Invalidate as changed.
+            $settings = $this->get_settings();
+
+            $this->update_displayed_images($this->courseid, $this, $settings, true);
         }
 
         return $changes;
@@ -1928,6 +1923,7 @@ class format_grid extends format_base {
      * If $data does not contain property with the option name, the option will not be updated
      *
      * @param stdClass|array $data return value from {@link moodleform::get_data()} or array with data
+     *
      * @return bool whether there were any changes to the options values
      */
     public function update_section_format_options($data) {
@@ -1962,11 +1958,15 @@ class format_grid extends format_base {
      * @param int $newactivityreset If true, reset the new activity to the default in the settings for the format.
      * @param int $fitpopupreset If true, reset the fit popup to the default in the settings for the format.
      * @param int $greyouthidden If true, reset the greyout hidden to the default in the settings for the format.
+     *
+     * @return bool If the displayed images were updated.
      */
     public function reset_grid_setting($courseid, $imagecontaineralignmentreset, $imagecontainernavigationreset,
         $imagecontainersizereset, $imageresizemethodreset, $imagecontainerstylereset, $sectiontitleoptionsreset,
         $newactivityreset, $fitpopupreset, $greyouthidden) {
         global $DB, $USER;
+
+        $imagesupdated = false;
 
         $context = $this->get_context();
 
@@ -2092,12 +2092,15 @@ class format_grid extends format_base {
 
                     if (($performimagecontainersize) || ($performimageresizemethod)) {
                         $courseformat->update_displayed_images($record->id, $courseformat, $newsettings, false);
+                        $imagesupdated = true;
                     }
                 } else {
                     $courseformat->update_format_options($updatedata);
                 }
             }
         }
+
+        return $imagesupdated;
     }
 
     // Grid specific methods...
@@ -2479,12 +2482,10 @@ class format_grid extends format_base {
                 }
                 $DB->set_field('format_grid_icon', 'displayedimageindex', $sectionimage->displayedimageindex,
                     array('sectionid' => $sectionimage->sectionid));
-error_log('suc '.print_r($sectionimage, true));
-$e = new \Exception;
-error_log($e->getTraceAsString());
             } else {
                 print_error('cannotconvertuploadedimagetodisplayedimage', 'format_grid',
-                    $CFG->wwwroot."/course/view.php?id=".$this->courseid, print_r($sectionimage, true));
+                    $CFG->wwwroot."/course/view.php?id=".$this->courseid,
+                    'SI: '.var_export($sectionimage, true).', DII: '.var_export($displayedimageinfo, true));
             }
         } else {
             $DB->set_field('format_grid_icon', 'image', null, array('sectionid' => $sectionimage->sectionid));
