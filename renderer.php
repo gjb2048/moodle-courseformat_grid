@@ -220,7 +220,8 @@ class format_grid_renderer extends format_section_renderer_base {
      *
      * @param stdClass $section The course_section entry from DB
      * @param stdClass $course The course entry from DB
-     * @param int $sectionreturn The section to return to after an action
+     * @param int $sectionreturn The section to return to after an action.
+     *
      * @return string HTML to output.
      */
     protected function section_header_onsectionpage($section, $course, $sectionreturn = null) {
@@ -247,7 +248,8 @@ class format_grid_renderer extends format_section_renderer_base {
         );
 
         // Create a span that contains the section title to be used to create the keyboard section move menu.
-        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname', 'id' => "sectionid-{$section->id}-title"));
+        $sectionname = get_section_name($course, $section);
+        $o .= html_writer::tag('span', $sectionname, array('class' => 'hidden sectionname', 'id' => "sectionid-{$section->id}-title"));
 
         $leftcontent = $this->section_left_content($section, $course, true);
         $o .= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
@@ -257,10 +259,45 @@ class format_grid_renderer extends format_section_renderer_base {
         $o .= html_writer::start_tag('div', array('class' => 'content'));
 
         $o .= html_writer::start_tag('div', array('class' => 'summary'));
-        $o .= $this->format_summary_text($section);
+        $o .= $this->single_section_page_summary($section, $sectionname, $course);
         $o .= html_writer::end_tag('div');
 
         $o .= $this->section_availability($section);
+
+        return $o;
+    }
+
+    /**
+     * Generate the single section page summary.
+     *
+     * @param stdClass $section The course_section entry from DB.
+     * @param string $sectionname The section name.
+     * @param stdClass $course The course entry from DB.
+     *
+     * @return string HTML to output.
+     */
+    protected function single_section_page_summary($section, $sectionname, $course) {
+        $summary = $this->format_summary_text($section);
+        $o = '';
+
+        if ($this->settings['singlepagesummaryimage'] > 1) { // I.e. not 'off'.
+            if (!empty($summary)) {
+                $data = new stdClass;
+
+                $sectionimage = $this->courseformat->get_image($course->id, $section->id);
+                $coursecontext = context_course::instance($course->id);
+                $gridimagepath = $this->courseformat->get_image_path();
+                $iswebp = (get_config('format_grid', 'defaultdisplayedimagefiletype') == 2);
+
+                $data->image = $this->courseformat->output_section_image(
+                    $section->id, $sectionname, $sectionimage, $coursecontext->id, $section, $gridimagepath, $this, $iswebp);
+                $data->summary = $summary;
+
+                $o = $this->render_from_template('format_grid/singlepagesummaryimage', $data);
+            }
+        } else {
+            $o = $summary;
+        }
 
         return $o;
     }
