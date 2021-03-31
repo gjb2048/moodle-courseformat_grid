@@ -20,15 +20,30 @@
     Single page summary image.
 
     Context variables required for this template:
+    * centre - If true, centre the content.
     * image - Image markup.
+    * left - If true, align the content to the left.
+    * right - If true, align the content to the right.
     * summary - Summary markup.
 
     Example context (json):
     {
+        "centre": true,
         "image": "Image markup",
+        "left": false,
+        "right": false,
         "summary": "Summary markup"
     }
 }}
-<div>
-{{{image}}}{{{summary}}}
+{{#left}}
+<div class="d-flex flex-row">
+{{/left}}
+{{#centre}}
+<div class="d-flex flex-column align-items-center">
+{{/centre}}
+{{#right}}
+<div class="d-flex flex-row-reverse">
+{{/right}}
+    <div class="p-1">{{{image}}}</div>
+    <div class="p-1{{^centre}} w-100{{/centre}}">{{{summary}}}</div>
 </div>

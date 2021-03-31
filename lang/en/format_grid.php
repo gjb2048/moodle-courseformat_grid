@@ -160,9 +160,9 @@ $string['setnewactivity'] = 'Show new activity notification image';
 $string['setnewactivity_help'] = "Show the new activity notification image when a new activity or resource are added to a section.";
 
 $string['singlepagesummaryimage'] = 'Show the grid image in the section summary on a single page.';
-$string['singlepagesummaryimage_help'] = "When the '\'Course layout\' is set to '\'Show one section per page\' then show the grid image for that section in the section summary when there is a summary in the position stated.";
+$string['singlepagesummaryimage_help'] = "When the 'Course layout' is set to 'Show one section per page' then show the grid image for that section in the section summary when there is a summary in the position stated.";
 $string['defaultsinglepagesummaryimage'] = 'Show the grid image in the section summary on a single page.';
-$string['defaultsinglepagesummaryimage_desc'] = "When the '\'Course layout\' is set to '\'Show one section per page\' then show the grid image for that section in the section summary when there is a summary in the position stated.";
+$string['defaultsinglepagesummaryimage_desc'] = "When the 'Course layout' is set to 'Show one section per page' then show the grid image for that section in the section summary when there is a summary in the position stated.";
 
 $string['setfitsectioncontainertowindow'] = 'Fit the section popup to the window';
 $string['setfitsectioncontainertowindow_help'] = 'If enabled, the popup box with the contents of the section will fit to the size of the window and will scroll inside if necessary.  If disabled, the entire page will scroll instead.';
