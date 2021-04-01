@@ -2980,7 +2980,6 @@ class format_grid extends format_base {
         }
 
         $original = imagecreatefromstring(file_get_contents($filepath)); // Need to alter / check for webp support.
-        //$theoriginal = imagecreatefromstring(file_get_contents($filepath)); // Need to alter / check for webp support.
 
         switch ($mime) {
             case 'image/png':
@@ -3030,23 +3029,23 @@ class format_grid extends format_base {
                 return false;
         }
 
-        $width = $requestedwidth;
-        $height = $requestedheight;
-
         if ($crop) {
-            $ratio = $width / $height;
+            $ratio = $requestedwidth / $requestedheight;
             $originalratio = $originalwidth / $originalheight;
             if ($originalratio < $ratio) {
                 // Change the supplied height - 'resizeToWidth'.
-                $ratio = $width / $originalwidth;
+                $ratio = $requestedwidth / $originalwidth;
+                $width = $requestedwidth;
                 $height = $originalheight * $ratio;
                 $cropheight = true;
             } else {
                 // Change the supplied width - 'resizeToHeight'.
-                $ratio = $height / $originalheight;
+                $ratio = $requestedheight / $originalheight;
                 $width = $originalwidth * $ratio;
+                $height = $requestedheight;
                 $cropheight = false;
             }
+
             if (function_exists('imagecreatetruecolor')) {
                 $tempimage = imagecreatetruecolor($width, $height);
             } else {
@@ -3055,22 +3054,16 @@ class format_grid extends format_base {
 
             // First step, resize.
             imagecopybicubic($tempimage, $original, 0, 0, 0, 0, $width, $height, $originalwidth, $originalheight);
-            imagedestroy($original);
-            $original = $tempimage;
 
             // Second step, crop.
             if ($cropheight) {
-                // Reset after change for resizeToWidth.
-                $height = $requestedheight;
                 // This is 'cropCenterHeight'.
-                $width = imagesx($original);
-                $srcoffset = (imagesy($original) / 2) - ($height / 2);
+                $srcoffset = ($height / 2) - ($requestedheight / 2);
+                $height = $requestedheight;
             } else {
-                // Reset after change for resizeToHeight.
-                $width = $requestedwidth;
                 // This is 'cropCenterWidth'.
-                $height = imagesy($original);
-                $srcoffset = (imagesx($original) / 2) - ($width / 2);
+                $srcoffset = ($width / 2) - ($requestedwidth / 2);
+                $width = $requestedwidth;
             }
 
             if (function_exists('imagecreatetruecolor')) {
@@ -3081,13 +3074,14 @@ class format_grid extends format_base {
 
             if ($cropheight) {
                 // This is 'cropCenterHeight'.
-                imagecopybicubic($finalimage, $original, 0, 0, 0, $srcoffset, $width, $height, $width, $height);
+                imagecopybicubic($finalimage, $tempimage, 0, 0, 0, $srcoffset, $width, $height, $width, $height);
             } else {
                 // This is 'cropCenterWidth'.
-                imagecopybicubic($finalimage, $original, 0, 0, $srcoffset, 0, $width, $height, $width, $height);
+                imagecopybicubic($finalimage, $tempimage, 0, 0, $srcoffset, 0, $width, $height, $width, $height);
             }
-        } else {
-            $ratio = min($width / $originalwidth, $height / $originalheight);
+            imagedestroy($tempimage);
+        } else { // Scale.
+            $ratio = min($requestedwidth / $originalwidth, $requestedheight / $originalheight);
 
             if ($ratio < 1) {
                 $targetwidth = floor($originalwidth * $ratio);
@@ -3104,8 +3098,7 @@ class format_grid extends format_base {
                 $finalimage = imagecreate($targetwidth, $targetheight);
             }
 
-            imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $targetwidth, $targetheight, $originalwidth,
-                $originalheight);
+            imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $targetwidth, $targetheight, $originalwidth, $originalheight);
         }
 
         ob_start();
