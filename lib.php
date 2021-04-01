@@ -2499,7 +2499,7 @@ class format_grid extends format_base {
                 'sectionimage_displayedimageindex' => $sectionimage->displayedimageindex,
                 'sectionimage_newimage' => $sectionimage->newimage
             );
-            $data = self::generate_image($tmpfilepath, $displayedimageinfo['width'], $displayedimageinfo['height'], $crop, $icbc, $newmime, $debugdata);
+            $data = self::generate_image_v2($tmpfilepath, $displayedimageinfo['width'], $displayedimageinfo['height'], $crop, $icbc, $newmime, $debugdata);
             if (!empty($data)) {
                 // Updated image.
                 $sectionimage->displayedimageindex++;
@@ -2933,6 +2933,245 @@ class format_grid extends format_base {
         $data = ob_get_clean();
 
         imagedestroy($original);
+        imagedestroy($finalimage);
+
+        return $data;
+    }
+
+    /**
+     * Generates a thumbnail for the given image
+     *
+     * If the GD library has at least version 2 and PNG support is available, the returned data
+     * is the content of a transparent PNG file containing the thumbnail. Otherwise, the function
+     * returns contents of a JPEG file with black background containing the thumbnail.
+     *
+     * @param string $filepath the full path to the original image file
+     * @param int $requestedwidth the width of the requested image.
+     * @param int $requestedheight the height of the requested image.
+     * @param bool $crop false = scale, true = crop.
+     * @param array $icbc The 'imagecontainerbackgroundcolour' as an RGB array.
+     * @param string $mime The mime type.
+     * @param array $debugdata Debug data if the image generation fails.
+     *
+     * @return string|bool false if a problem occurs or the image data.
+     */
+    private static function generate_image_v2($filepath, $requestedwidth, $requestedheight, $crop, $icbc, $mime, $debugdata) {
+        if (empty($filepath) or empty($requestedwidth) or empty($requestedheight)) {
+            return false;
+        }
+
+        $imageinfo = getimagesize($filepath);
+
+        if (empty($imageinfo)) {
+            print_error('noimageinformation', 'format_grid', '', self::debugdata_decode($debugdata), 'generate_image');
+            return false;
+        }
+
+        $originalwidth = $imageinfo[0];
+        $originalheight = $imageinfo[1];
+
+        if (empty($originalheight)) {
+            print_error('originalheightempty', 'format_grid', '', self::debugdata_decode($debugdata), 'generate_image');
+            return false;
+        }
+        if (empty($originalwidth)) {
+            print_error('originalwidthempty', 'format_grid', '', self::debugdata_decode($debugdata), 'generate_image');
+            return false;
+        }
+
+        $original = imagecreatefromstring(file_get_contents($filepath)); // Need to alter / check for webp support.
+        //$theoriginal = imagecreatefromstring(file_get_contents($filepath)); // Need to alter / check for webp support.
+
+        switch ($mime) {
+            case 'image/png':
+                if (function_exists('imagepng')) {
+                    $imagefnc = 'imagepng';
+                    $filters = PNG_NO_FILTER;
+                    $quality = 1;
+                } else {
+                    print_error('formatnotsupported', 'format_grid', '', 'PNG, '.self::debugdata_decode($debugdata), 'generate_image');
+                    return false;
+                }
+                break;
+            case 'image/jpeg':
+                if (function_exists('imagejpeg')) {
+                    $imagefnc = 'imagejpeg';
+                    $filters = null;
+                    $quality = 90;
+                } else {
+                    print_error('formatnotsupported', 'format_grid', '', 'JPG, '.self::debugdata_decode($debugdata), 'generate_image');
+                    return false;
+                }
+                break;
+            /* Moodle does not yet natively support webp as a mime type, but have here for us on the displayed image and
+               not yet as a source image. */
+            case 'image/webp':
+                if (function_exists('imagewebp')) {
+                    $imagefnc = 'imagewebp';
+                    $filters = null;
+                    $quality = 90;
+                } else {
+                    print_error('formatnotsupported', 'format_grid', '', 'WEBP, '.self::debugdata_decode($debugdata), 'generate_image');
+                    return false;
+                }
+                break;
+            case 'image/gif':
+                if (function_exists('imagegif')) {
+                    $imagefnc = 'imagegif';
+                    $filters = null;
+                    $quality = null;
+                } else {
+                    print_error('formatnotsupported', 'format_grid', '', 'GIF, '.self::debugdata_decode($debugdata), 'generate_image');
+                    return false;
+                }
+                break;
+            default:
+                print_error('mimetypenotsupported', 'format_grid', '', $mime.', '.self::debugdata_decode($debugdata), 'generate_image');
+                return false;
+        }
+
+        $width = $requestedwidth;
+        $height = $requestedheight;
+//error_log('FN: '.$debugdata['filename'].' - RW: '.$requestedwidth.' - RH: '.$requestedheight.' - OW: '.$originalwidth.' - OH: '.$originalheight);
+        // Note: Code transformed from original 'resizeAndCrop' in 'imagelib.php' in the Moodle 1.9 version.
+/*        if ($crop) {
+            $ratio = $width / $height;
+            $originalratio = $originalwidth / $originalheight;
+            if ($originalratio < $ratio) {
+                // Change the supplied height - 'resizeToWidth'.
+                $ratio = $width / $originalwidth;
+                $height = $originalheight * $ratio;
+                $cropheight = true;
+error_log('CHW: '.$width.' - CHH: '.$height);
+            } else {
+                // Change the supplied width - 'resizeToHeight'.
+                $ratio = $height / $originalheight;
+                $width = $originalwidth * $ratio;
+                $cropheight = false;
+error_log('CWW: '.$width.' - CWH: '.$height);
+            }
+        } else {
+error_log('W: '.$width.' - H: '.$height);
+        }
+
+        if (function_exists('imagecreatetruecolor')) {
+            $tempimage = imagecreatetruecolor($width, $height);
+            if ($imagefnc === 'imagepng') {
+                imagealphablending($tempimage, false);
+                imagefill($tempimage, 0, 0, imagecolorallocatealpha($tempimage, 0, 0, 0, 127));
+                imagesavealpha($tempimage, true);
+            } else if (($imagefnc === 'imagejpeg') || ($imagefnc === 'imagewebp') || ($imagefnc === 'imagegif')) {
+                imagealphablending($tempimage, false);
+                imagefill($tempimage, 0, 0, imagecolorallocate($tempimage, $icbc['r'], $icbc['g'], $icbc['b']));
+            }
+        } else {
+            $tempimage = imagecreate($width, $height);
+        }
+*/
+        if ($crop) {
+            $ratio = $width / $height;
+            $originalratio = $originalwidth / $originalheight;
+            if ($originalratio < $ratio) {
+                // Change the supplied height - 'resizeToWidth'.
+                $ratio = $width / $originalwidth;
+                $height = $originalheight * $ratio;
+                $cropheight = true;
+//error_log('CHW: '.$width.' - CHH: '.$height);
+            } else {
+                // Change the supplied width - 'resizeToHeight'.
+                $ratio = $height / $originalheight;
+                $width = $originalwidth * $ratio;
+                $cropheight = false;
+//error_log('CWW: '.$width.' - CWH: '.$height);
+            }
+            if (function_exists('imagecreatetruecolor')) {
+                $tempimage = imagecreatetruecolor($width, $height);
+            } else {
+                $tempimage = imagecreate($width, $height);
+            }
+
+            // First step, resize.
+            imagecopybicubic($tempimage, $original, 0, 0, 0, 0, $width, $height, $originalwidth, $originalheight);
+            //$finalimage = imagecreatetruecolor($width, $height);
+            //imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $width, $height, $originalwidth, $originalheight);
+            imagedestroy($original);
+            $original = $tempimage;
+
+            // Second step, crop.
+            if ($cropheight) {
+                // Reset after change for resizeToWidth.
+                $height = $requestedheight;
+                // This is 'cropCenterHeight'.
+                $width = imagesx($original);
+                $srcoffset = (imagesy($original) / 2) - ($height / 2);
+error_log('CHCW: '.$width.' - CHCH: '.$height.' - SRCO: '.$srcoffset);
+            } else {
+                // Reset after change for resizeToHeight.
+                $width = $requestedwidth;
+                // This is 'cropCenterWidth'.
+                $height = imagesy($original);
+                $srcoffset = (imagesx($original) / 2) - ($width / 2);
+error_log('CWCW: '.$width.' - CWCH: '.$height.' - SRCO: '.$srcoffset);
+            }
+
+            if (function_exists('imagecreatetruecolor')) {
+                $finalimage = imagecreatetruecolor($width, $height);
+            } else {
+                $finalimage = imagecreate($width, $height);
+            }
+
+            if ($cropheight) {
+                // This is 'cropCenterHeight'.
+                imagecopybicubic($finalimage, $original, 0, 0, 0, $srcoffset, $width, $height, $width, $height);
+                //imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $width, $height, $width, $height);
+            } else {
+                // This is 'cropCenterWidth'.
+                imagecopybicubic($finalimage, $original, 0, 0, $srcoffset, 0, $width, $height, $width, $height);
+                //imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $width, $height, $width, $height);
+            }
+        } else {
+            //$finalimage = $tempimage;
+
+            $ratio = min($width / $originalwidth, $height / $originalheight);
+
+            if ($ratio < 1) {
+                $targetwidth = floor($originalwidth * $ratio);
+                $targetheight = floor($originalheight * $ratio);
+error_log('R < 1: '.$ratio.' - TW: '.$targetwidth.' - TH: '.$targetheight);
+          } else {
+                // Do not enlarge the original file if it is smaller than the requested thumbnail size.
+                $targetwidth = $originalwidth;
+                $targetheight = $originalheight;
+error_log('R >= 1: '.$ratio.' - TW: '.$targetwidth.' - TH: '.$targetheight);
+            }
+
+            $dstx = floor(($width - $targetwidth) / 2);
+            $dsty = floor(($height - $targetheight) / 2);
+error_log('DSTX: '.$dstx.' - DSTY: '.$dsty);
+
+        if (function_exists('imagecreatetruecolor')) {
+            $finalimage = imagecreatetruecolor($targetwidth, $targetheight);
+        } else {
+            $finalimage = imagecreate($targetwidth, $targetheight);
+        }
+
+            //imagecopybicubic($finalimage, $original, $dstx, $dsty, 0, 0, $targetwidth, $targetheight, $originalwidth,
+            //    $originalheight);
+            imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $targetwidth, $targetheight, $originalwidth,
+                $originalheight);
+        }
+
+        ob_start();
+        if (!$imagefnc($finalimage, null, $quality, $filters)) {
+        //if (!$imagefnc($theoriginal, null, $quality, $filters)) {
+            ob_end_clean();
+            print_error('functionfailed', 'format_grid', '', $imagefnc.', '.self::debugdata_decode($debugdata), 'generate_image');
+            return false;
+        }
+        $data = ob_get_clean();
+
+        imagedestroy($original);
+        //imagedestroy($theoriginal);
         imagedestroy($finalimage);
 
         return $data;
