@@ -3032,42 +3032,7 @@ class format_grid extends format_base {
 
         $width = $requestedwidth;
         $height = $requestedheight;
-//error_log('FN: '.$debugdata['filename'].' - RW: '.$requestedwidth.' - RH: '.$requestedheight.' - OW: '.$originalwidth.' - OH: '.$originalheight);
-        // Note: Code transformed from original 'resizeAndCrop' in 'imagelib.php' in the Moodle 1.9 version.
-/*        if ($crop) {
-            $ratio = $width / $height;
-            $originalratio = $originalwidth / $originalheight;
-            if ($originalratio < $ratio) {
-                // Change the supplied height - 'resizeToWidth'.
-                $ratio = $width / $originalwidth;
-                $height = $originalheight * $ratio;
-                $cropheight = true;
-error_log('CHW: '.$width.' - CHH: '.$height);
-            } else {
-                // Change the supplied width - 'resizeToHeight'.
-                $ratio = $height / $originalheight;
-                $width = $originalwidth * $ratio;
-                $cropheight = false;
-error_log('CWW: '.$width.' - CWH: '.$height);
-            }
-        } else {
-error_log('W: '.$width.' - H: '.$height);
-        }
 
-        if (function_exists('imagecreatetruecolor')) {
-            $tempimage = imagecreatetruecolor($width, $height);
-            if ($imagefnc === 'imagepng') {
-                imagealphablending($tempimage, false);
-                imagefill($tempimage, 0, 0, imagecolorallocatealpha($tempimage, 0, 0, 0, 127));
-                imagesavealpha($tempimage, true);
-            } else if (($imagefnc === 'imagejpeg') || ($imagefnc === 'imagewebp') || ($imagefnc === 'imagegif')) {
-                imagealphablending($tempimage, false);
-                imagefill($tempimage, 0, 0, imagecolorallocate($tempimage, $icbc['r'], $icbc['g'], $icbc['b']));
-            }
-        } else {
-            $tempimage = imagecreate($width, $height);
-        }
-*/
         if ($crop) {
             $ratio = $width / $height;
             $originalratio = $originalwidth / $originalheight;
@@ -3076,13 +3041,11 @@ error_log('W: '.$width.' - H: '.$height);
                 $ratio = $width / $originalwidth;
                 $height = $originalheight * $ratio;
                 $cropheight = true;
-//error_log('CHW: '.$width.' - CHH: '.$height);
             } else {
                 // Change the supplied width - 'resizeToHeight'.
                 $ratio = $height / $originalheight;
                 $width = $originalwidth * $ratio;
                 $cropheight = false;
-//error_log('CWW: '.$width.' - CWH: '.$height);
             }
             if (function_exists('imagecreatetruecolor')) {
                 $tempimage = imagecreatetruecolor($width, $height);
@@ -3092,8 +3055,6 @@ error_log('W: '.$width.' - H: '.$height);
 
             // First step, resize.
             imagecopybicubic($tempimage, $original, 0, 0, 0, 0, $width, $height, $originalwidth, $originalheight);
-            //$finalimage = imagecreatetruecolor($width, $height);
-            //imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $width, $height, $originalwidth, $originalheight);
             imagedestroy($original);
             $original = $tempimage;
 
@@ -3104,14 +3065,12 @@ error_log('W: '.$width.' - H: '.$height);
                 // This is 'cropCenterHeight'.
                 $width = imagesx($original);
                 $srcoffset = (imagesy($original) / 2) - ($height / 2);
-error_log('CHCW: '.$width.' - CHCH: '.$height.' - SRCO: '.$srcoffset);
             } else {
                 // Reset after change for resizeToHeight.
                 $width = $requestedwidth;
                 // This is 'cropCenterWidth'.
                 $height = imagesy($original);
                 $srcoffset = (imagesx($original) / 2) - ($width / 2);
-error_log('CWCW: '.$width.' - CWCH: '.$height.' - SRCO: '.$srcoffset);
             }
 
             if (function_exists('imagecreatetruecolor')) {
@@ -3123,47 +3082,34 @@ error_log('CWCW: '.$width.' - CWCH: '.$height.' - SRCO: '.$srcoffset);
             if ($cropheight) {
                 // This is 'cropCenterHeight'.
                 imagecopybicubic($finalimage, $original, 0, 0, 0, $srcoffset, $width, $height, $width, $height);
-                //imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $width, $height, $width, $height);
             } else {
                 // This is 'cropCenterWidth'.
                 imagecopybicubic($finalimage, $original, 0, 0, $srcoffset, 0, $width, $height, $width, $height);
-                //imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $width, $height, $width, $height);
             }
         } else {
-            //$finalimage = $tempimage;
-
             $ratio = min($width / $originalwidth, $height / $originalheight);
 
             if ($ratio < 1) {
                 $targetwidth = floor($originalwidth * $ratio);
                 $targetheight = floor($originalheight * $ratio);
-error_log('R < 1: '.$ratio.' - TW: '.$targetwidth.' - TH: '.$targetheight);
-          } else {
+            } else {
                 // Do not enlarge the original file if it is smaller than the requested thumbnail size.
                 $targetwidth = $originalwidth;
                 $targetheight = $originalheight;
-error_log('R >= 1: '.$ratio.' - TW: '.$targetwidth.' - TH: '.$targetheight);
             }
 
-            $dstx = floor(($width - $targetwidth) / 2);
-            $dsty = floor(($height - $targetheight) / 2);
-error_log('DSTX: '.$dstx.' - DSTY: '.$dsty);
+            if (function_exists('imagecreatetruecolor')) {
+                $finalimage = imagecreatetruecolor($targetwidth, $targetheight);
+            } else {
+                $finalimage = imagecreate($targetwidth, $targetheight);
+            }
 
-        if (function_exists('imagecreatetruecolor')) {
-            $finalimage = imagecreatetruecolor($targetwidth, $targetheight);
-        } else {
-            $finalimage = imagecreate($targetwidth, $targetheight);
-        }
-
-            //imagecopybicubic($finalimage, $original, $dstx, $dsty, 0, 0, $targetwidth, $targetheight, $originalwidth,
-            //    $originalheight);
             imagecopybicubic($finalimage, $original, 0, 0, 0, 0, $targetwidth, $targetheight, $originalwidth,
                 $originalheight);
         }
 
         ob_start();
         if (!$imagefnc($finalimage, null, $quality, $filters)) {
-        //if (!$imagefnc($theoriginal, null, $quality, $filters)) {
             ob_end_clean();
             print_error('functionfailed', 'format_grid', '', $imagefnc.', '.self::debugdata_decode($debugdata), 'generate_image');
             return false;
@@ -3171,7 +3117,6 @@ error_log('DSTX: '.$dstx.' - DSTY: '.$dsty);
         $data = ob_get_clean();
 
         imagedestroy($original);
-        //imagedestroy($theoriginal);
         imagedestroy($finalimage);
 
         return $data;
