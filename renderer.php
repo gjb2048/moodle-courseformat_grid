@@ -207,7 +207,7 @@ class format_grid_renderer extends format_section_renderer_base {
      * @return string HTML to output.
      */
     protected function section_header($section, $course, $onsectionpage, $sectionreturn=null) {
-        if (($section->section == 0) && ($onsectionpage)) {
+        if ($onsectionpage) {
             return $this->section_header_onsectionpage($section, $course, $sectionreturn);
         } else {
             return parent::section_header($section, $course, $onsectionpage, $sectionreturn);
@@ -215,8 +215,8 @@ class format_grid_renderer extends format_section_renderer_base {
     }
 
     /**
-     * Generate the display of the header part of a section before course modules are included for
-     * when section 0 is used with a single section page.
+     * Generate the display of the header part of a section before course modules are included
+     * with a single section page.
      *
      * @param stdClass $section The course_section entry from DB
      * @param stdClass $course The course entry from DB
@@ -339,6 +339,8 @@ class format_grid_renderer extends format_section_renderer_base {
         if (($this->section0attop) && ($this->settings['setsection0ownpagenogridonesection'] == 1)) {
             return parent::print_single_section_page($course, $sections, $mods, $modnames, $modnamesused, $displaysection);
         } else {
+            /* Output the single section page without section 0 at the top.
+               Thus when section 0 is on its own page, it won't be displayed twice. */
             $modinfo = get_fast_modinfo($course);
             $course = course_get_format($course)->get_course();
 
