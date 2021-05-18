@@ -1060,7 +1060,7 @@ class toolbox {
 
             if (function_exists('imagecreatetruecolor')) {
                 $tempimage = imagecreatetruecolor($width, $height);
-                if ($mime == 'image/png') {
+                if ($imagefnc === 'imagepng') {
                     imagealphablending($tempimage, false);
                     imagesavealpha($tempimage, true);
                 }
@@ -1084,7 +1084,7 @@ class toolbox {
 
             if (function_exists('imagecreatetruecolor')) {
                 $finalimage = imagecreatetruecolor($width, $height);
-                if ($mime == 'image/png') {
+                if ($imagefnc === 'imagepng') {
                     imagealphablending($finalimage, false);
                     imagesavealpha($finalimage, true);
                 }
@@ -1114,7 +1114,7 @@ class toolbox {
 
             if (function_exists('imagecreatetruecolor')) {
                 $finalimage = imagecreatetruecolor($targetwidth, $targetheight);
-                if ($mime == 'image/png') {
+                if ($imagefnc === 'imagepng') {
                     imagealphablending($finalimage, false);
                     imagesavealpha($finalimage, true);
                 }
