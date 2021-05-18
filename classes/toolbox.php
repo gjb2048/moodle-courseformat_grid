@@ -621,7 +621,7 @@ class toolbox {
         }
     }
 
-    protected static function delete_displayed_image($contextid, $sectionimage, $gridimagepath, $fs) {
+    public static function delete_displayed_image($contextid, $sectionimage, $gridimagepath, $fs) {
         global $DB;
 
         if ($file = $fs->get_file($contextid, 'course', 'section', $sectionimage->sectionid, $gridimagepath,
@@ -1060,6 +1060,10 @@ class toolbox {
 
             if (function_exists('imagecreatetruecolor')) {
                 $tempimage = imagecreatetruecolor($width, $height);
+                if ($mime == 'image/png') {
+                    imagealphablending($tempimage, false);
+                    imagesavealpha($tempimage, true);
+                }
             } else {
                 $tempimage = imagecreate($width, $height);
             }
@@ -1080,6 +1084,10 @@ class toolbox {
 
             if (function_exists('imagecreatetruecolor')) {
                 $finalimage = imagecreatetruecolor($width, $height);
+                if ($mime == 'image/png') {
+                    imagealphablending($finalimage, false);
+                    imagesavealpha($finalimage, true);
+                }
             } else {
                 $finalimage = imagecreate($width, $height);
             }
@@ -1106,6 +1114,10 @@ class toolbox {
 
             if (function_exists('imagecreatetruecolor')) {
                 $finalimage = imagecreatetruecolor($targetwidth, $targetheight);
+                if ($mime == 'image/png') {
+                    imagealphablending($finalimage, false);
+                    imagesavealpha($finalimage, true);
+                }
             } else {
                 $finalimage = imagecreate($targetwidth, $targetheight);
             }

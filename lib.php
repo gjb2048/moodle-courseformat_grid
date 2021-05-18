@@ -1650,7 +1650,7 @@ class format_grid extends format_base {
             $contextid = $this->get_contextid();
             $fs = get_file_storage();
             $gridimagepath = \format_grid\toolbox::get_image_path();
-            $this->delete_displayed_image($contextid, $sectionimage, $gridimagepath, $fs);
+            \format_grid\toolbox::delete_displayed_image($contextid, $sectionimage, $gridimagepath, $fs);
         }
 
         return parent::update_section_format_options($data);
