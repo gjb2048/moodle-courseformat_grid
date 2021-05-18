@@ -406,7 +406,7 @@ class toolbox {
      * @return moodle_url The created URL.
      */
     public static function grid_moodle_url($url, array $params = null) {
-        return new moodle_url('/course/format/grid/' . $url, $params);
+        return new \moodle_url('/course/format/grid/' . $url, $params);
     }
 
     /**
@@ -447,7 +447,7 @@ class toolbox {
         $lockfactory = \core\lock\lock_config::get_lock_factory('format_grid');
         if ($lock = $lockfactory->get_lock('sectionid'.$sectionid, 5)) {
             if (!$sectionimage = $DB->get_record('format_grid_icon', array('sectionid' => $sectionid))) {
-                $newimagecontainer = new stdClass();
+                $newimagecontainer = new \stdClass();
                 $newimagecontainer->sectionid = $sectionid;
                 $newimagecontainer->courseid = $courseid;
                 $newimagecontainer->displayedimageindex = 0;
